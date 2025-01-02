@@ -1,1 +1,10 @@
 db.sqlite
+.venv
+breadboard.ipynb
+.env
+*.docx
+filelist.txt
+src/core.egg-info
+src/core/__pycache__
+src/build
+__pycache__

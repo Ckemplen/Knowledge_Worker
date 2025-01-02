@@ -1,0 +1,156 @@
+# pylint: disable=no-self-use
+from __future__ import annotations
+from collections import defaultdict
+from datetime import date, datetime
+from typing import Dict, List, Set
+import pytest
+from core import bootstrap
+from core.domain import commands, model
+from core.service_layer import handlers
+from core.adapters import repository
+from core.service_layer import unit_of_work
+from dataclasses import asdict
+
+
+class FakeDocumentsRepository(repository.AbstractRepository):
+    def __init__(self, documents):
+        super().__init__()
+        self._documents: Set[model.Document] = set(documents)
+
+    def _add(self, document):
+        return self.add(document)
+    
+    def _get(self, reference):
+        return self.get(reference)
+
+    def add(self, cmd):
+        document = asdict(cmd)
+        doc_comments = document.get('doc_comments')
+        del document['doc_comments']
+        doc = model.Document(**document, id=len(self._documents)+1, summary="")
+        doc.compose_DocumentCreated_event(doc_comments)
+        self._documents.add(doc)
+        return doc
+
+    def get(self, reference):
+        return next((d for d in self._documents if d.id == reference), None)
+    
+    def list(self):
+        return self._documents
+
+    def get_by_comment_id(self, reference):
+        return next(
+            (d for d in self._documents for c in d.comments if c.id == reference),
+            None,
+        )
+
+class FakeCommentsRepository(repository.AbstractRepository):
+    def __init__(self, comments):
+        super().__init__()
+        self._comments: Set[model.Comment] = set(comments)
+
+    def _add(self, comment):
+        return self.add(comment)
+    
+    def _get(self, reference):
+        return self.get(reference)
+
+    def add(self, comment):
+        comment = model.Comment(**comment, id=len(self._comments)+1)
+        self._comments.add(comment)
+
+    def get(self, reference):
+        return next((c for c in self._comments if c.id == reference), None)
+
+class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
+    def __init__(self):
+        self.documents = FakeDocumentsRepository([])
+        self.comments = FakeCommentsRepository([])
+        self.committed = False
+
+    def _commit(self):
+        self.committed = True
+
+    def commit(self):
+        self._commit()
+
+    def rollback(self):
+        pass
+
+
+
+def bootstrap_test_app():
+    return bootstrap.bootstrap(
+        uow=FakeUnitOfWork()
+    )
+
+
+class TestAddDocument:
+    def test_for_new_document(self):
+        bus = bootstrap_test_app()
+        bus.handle(commands.CreateDocument(
+            filepath="fake/file/path",
+            filename='fake/file/path.docx',
+            text='Example text',
+            created_by='CKEMPLEN',
+            last_modified_by='CKEMPLEN',
+            last_modified_at=datetime.now(),
+            created_at=datetime.now(),
+            processed_at=datetime.now(),
+        ))
+        assert bus.uow.documents.get(reference=1) is not None
+        assert bus.uow.committed
+
+    def test_for_existing_document(self):
+        bus = bootstrap_test_app()
+        bus.handle(commands.CreateDocument(
+            filepath="fake/file/path",
+            filename='fake/file/path.docx',
+            text='Example text',
+            created_by='CKEMPLEN',
+            last_modified_by='CKEMPLEN',
+            last_modified_at=datetime.now(),
+            created_at=datetime.now(),
+            processed_at=datetime.now(),
+        ))
+        bus.handle(commands.CreateDocument(
+            filepath="fake/file/path",
+            filename='fake/file/path.docx',
+            text='Example text',
+            created_by='CKEMPLEN',
+            last_modified_by='CKEMPLEN',
+            last_modified_at=datetime.now(),
+            created_at=datetime.now(),
+            processed_at=datetime.now(),
+        ))
+        assert bus.uow.documents.get(reference=2).previous_version_id == 1
+        assert bus.uow.documents.get(reference=2).version == 2
+
+    def test_comments_added(self):
+        bus = bootstrap_test_app()
+        bus.handle(commands.CreateDocument(
+            filepath="fake/file/path",
+            filename='fake/file/path.docx',
+            text='Example text',
+            created_by='CKEMPLEN',
+            last_modified_by='CKEMPLEN',
+            last_modified_at=datetime.now(),
+            created_at=datetime.now(),
+            processed_at=datetime.now(),
+            doc_comments=[
+                    ("reference text 1", "author name 1", "2024-12-31T14:24:01Z", "comment text 1"),
+                    ("reference text 2", "author name 2", "2024-12-31T14:24:02Z", "comment text 2"),
+                    ("reference text 3", "author name 3", "2024-12-31T14:24:03Z", "comment text 3"),
+                    ("reference text 4", "author name 4", "2024-12-31T14:24:04Z", "comment text 4")
+            ]
+        ))
+        bus.uow.collect_new_events()
+        events = []
+        for d in bus.uow.documents.list():
+            events.extend(d.events) 
+        print(events)
+        for e in events:
+            bus.handle(e)
+
+        assert bus.uow.comments.get(reference=1).author == 'author name 1'
+        assert bus.uow.committed

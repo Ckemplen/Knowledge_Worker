@@ -1,0 +1,21 @@
+from dataclasses import dataclass
+from typing import Optional, List, Tuple, Dict
+from datetime import datetime
+
+class Event:
+    pass
+
+
+@dataclass
+class DocumentCreated(Event):
+    document_id: int
+    comments: Optional[List[Dict]]
+
+@dataclass
+class DocumentProcessed(Event):
+    document_id: int
+
+@dataclass
+class CommentCreated(Event):
+    comment_id: int
+    document_id: int
