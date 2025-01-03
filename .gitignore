@@ -9,3 +9,8 @@ src/core/__pycache__
 src/build
 __pycache__
 seed_canonical_topics.json
+csv_backups
+message_bus_log.json
+test_canon_outputs.json
+filelist_longer.txt
+filelist.txt

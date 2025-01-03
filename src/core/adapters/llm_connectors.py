@@ -1,11 +1,15 @@
 import requests
 import abc
-import uuid
+import random
 import json
 import tiktoken
+import datetime
+import logging
 import core.config as config
 
-from typing import TypedDict, List, Dict
+from typing import TypedDict, List, Dict, Optional, NotRequired
+
+logging.basicConfig(level=logging.INFO)
 
 class DASubtopic(TypedDict):
     name: Dict[str, str]
@@ -34,34 +38,52 @@ class DocumentAnalysisResponse(TypedDict):
 class CanonicalEntityResponseItem(TypedDict):
     name: str
     description: str
-    canonical_entity_id: int
+    canonical_entity_id: NotRequired[int]
     raw_entity_ids: List[int]
 
 CanonicalEntityResponse = List[CanonicalEntityResponseItem]
 
 
 class AbstractConnector(abc.ABC):
+    token_count = {
+        'total': {
+            'input': 0,
+            'output': 0
+        },
+    }
+
     def __init__(self):
-        self.token_count = {
-            'total': {
-                'input': 0,
-                'output': 0
-            },
-            }
+        pass
 
     def generate(self, **kwargs):
-        generation_uuid = uuid()
-
-        new_input_tokens = self.calculate_tokens(**kwargs)
         result = self._generate(**kwargs)
-        new_output_tokens = self.calculate_tokens(result=result)
 
-        self.token_count['total']['input'] += new_input_tokens
-        self.token_count['total']['output'] += new_output_tokens
-        self.token_count[generation_uuid]['input'] += new_input_tokens
-        self.token_count[generation_uuid]['output'] += new_output_tokens
+        try:
+            # Generate a unique key using the concrete class's name and a datetime stamp
+            generation_uuid = f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}-{self.__class__.__name__}"
 
-        return self._generate(**kwargs)
+            new_input_tokens = self.calculate_tokens(**kwargs)
+            new_output_tokens = self.calculate_tokens(result=result)
+
+            # Update class token count
+            AbstractConnector.token_count['total']['input'] += new_input_tokens
+            AbstractConnector.token_count['total']['output'] += new_output_tokens
+            AbstractConnector.token_count[generation_uuid] = {'input': new_input_tokens, 'output': new_output_tokens}
+
+            # Log the update
+            logging.info(f"Updated token count for {generation_uuid}: {AbstractConnector.token_count[generation_uuid]}")
+            logging.info(f"Total token count: {AbstractConnector.token_count['total']}")
+
+            print(f"Updated token count for {generation_uuid}: {AbstractConnector.token_count[generation_uuid]}")
+            print(f"Total token count: {AbstractConnector.token_count['total']}")
+
+        except Exception as e:
+            logging.error("Error calculating token usage.")
+            logging.error(e)
+            print("Error calculating token usage.")
+            print(e)
+
+        return result
     
 
     def calculate_tokens(self, **kwargs) -> int:
@@ -76,6 +98,9 @@ class AbstractConnector(abc.ABC):
         raise NotImplementedError
 
 class FakeDocumentAnalysisConnector(AbstractConnector):
+    def __init__(self):
+        super().__init__()
+
     def _generate(self, **kwargs):
         response: DocumentAnalysisResponse = {
             'document_analysis': {
@@ -101,6 +126,7 @@ class FakeDocumentAnalysisConnector(AbstractConnector):
     
 class DocumentAnalysisConnector(AbstractConnector):
     def __init__(self):
+        super().__init__()
         self.FLOW_ENDPOINT = config.DOCANALYSIS_ENDPOINT
         self.FLOW_HOST =  self.FLOW_ENDPOINT.split(":443")[0]
 
@@ -129,9 +155,10 @@ class DocumentAnalysisConnector(AbstractConnector):
 class CanonicalEntityConsolidationConnector(AbstractConnector):
     """
     Example usage:
-    response = CanonicalEntityConsolidationConnector().consolidate(raw_entities=raw_entities)
+    response = CanonicalEntityConsolidationConnector().consolidate(raw_entities, existing_canonical_entities)
     """
     def __init__(self):
+        super().__init__()
         self.FLOW_ENDPOINT = config.CANONICAL_ENTITIES_CONSOLIDATION_ENDPOINT
         self.FLOW_HOST =  self.FLOW_ENDPOINT.split(":443")[0]
 

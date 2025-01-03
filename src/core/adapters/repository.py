@@ -9,10 +9,16 @@ import json
 
 from dataclasses import asdict
 
+class DatetimeJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
 def log_change(session, entity_name, entity_id, previous_object, revised_object):
     changelog = orm.ChangelogORM(
-        previous_object_json=json.dumps(previous_object),
-        revised_object_json=json.dumps(revised_object),
+        previous_object_json=json.dumps(previous_object, cls=DatetimeJSONEncoder),
+        revised_object_json=json.dumps(revised_object, cls=DatetimeJSONEncoder),
         entity_name=entity_name,
         entity_id=entity_id
     )
@@ -21,7 +27,8 @@ def log_change(session, entity_name, entity_id, previous_object, revised_object)
     return None
 
 ORM_OBJECT = Union[None, orm.DocumentEntityORM, orm.DocumentORM, orm.DocumentTopicORM, orm.CommentORM, orm.RawEntityORM, orm.RawTopicORM, orm.TopicRawTopicORM, orm.EntityRawEntityORM]
-PYDANTIC_OBJECT = Union[None, model.DocumentEntity, model.Document, model.DocumentTopic, model.Comment, model.RawEntity, model.RawTopic, model.TopicRawTopic, model.EntityRawEntity]
+PYDANTIC_OBJECT = Union[None, model.Document, model.Comment, model.RawEntity, model.RawTopic]
+DOMAIN_DATACLASS = Union[None, model.DocumentEntity, model.DocumentTopic, model.TopicRawTopic, model.EntityRawEntity]
 class AbstractRepository(abc.ABC):
     def __init__(self):
         self.seen = set()
@@ -38,8 +45,8 @@ class AbstractRepository(abc.ABC):
         # Log the change
         log_change(
             self.session,
-            source_table_name=updated_obj.__class__.__name__,
-            source_id=updated_obj.id,
+            entity_name=updated_obj.__class__.__name__,
+            entity_id=updated_obj.id,
             previous_object=original_object.model_dump(),
             revised_object=return_obj.model_dump()
         )
@@ -170,16 +177,16 @@ class SqlAlchemyRawEntitiesRepository(AbstractRepository):
         orm_raw_entity = orm.RawEntityORM(**raw_entity)
         self.session.add(orm_raw_entity)
         self.session.flush()
-        pydantic_raw_entity = model.RawEntity(**orm_raw_entity.to_dict())
+        pydantic_raw_entity = model.RawEntity.model_validate(**orm_raw_entity.to_dict())
         return pydantic_raw_entity
 
     def _get(self, reference):
         raw_entity_obj = self.session.query(orm.RawEntityORM).filter_by(id=reference).one()
-        return model.RawEntity.model_validate(raw_entity_obj)
+        return model.RawEntity.model_validate(raw_entity_obj.to_dict())
 
     def _list(self):
         raw_entity_objs = self.session.query(orm.RawEntityORM).all()
-        return [model.RawEntity.model_validate(r_e) for r_e in raw_entity_objs]
+        return [model.RawEntity.model_validate(r_e.to_dict()) for r_e in raw_entity_objs]
     
 
 
@@ -216,23 +223,31 @@ class SqlAlchemyEntitiesRepository(AbstractRepository):
         pydantic_entity = model.Entity(**orm_entity.to_dict())
         return pydantic_entity
 
-    def _get(self, reference):
-        entity_obj = self.session.query(orm.EntityORM).filter_by(id=reference).one()
-        return model.Entity.model_validate(entity_obj)
+    def _get(self, reference) -> Union[model.Entity, None]:
+        entity_obj = self.session.query(orm.EntityORM).filter_by(id=reference).first()
+        return model.Entity.model_validate(entity_obj.to_dict()) if entity_obj is not None else None
 
-    def get_raw_entities(self, reference) -> orm.RawEntityORM:
-        entity_obj = self.session.query(orm.EntityORM).filter_by(id=reference).one()
-        raw_entities: orm.RawEntityORM = entity_obj.raw_entities
-        return raw_entities
+    def get_raw_entities(self, reference) -> Union[List[orm.RawEntityORM], None]:
+        entity_obj = self.session.query(orm.EntityORM).filter_by(id=reference).first()
+        if entity_obj is not None:
+            raw_entities: List[orm.RawEntityORM] = entity_obj.raw_entities
+            return raw_entities
+        else:
+            return None
     
-    def add_raw_entity(self, entity_id, raw_entity_id):
-        new_link = orm.EntityRawEntityORM(entity_id=entity_id, raw_entity_id=raw_entity_id)
+    def add_raw_entity(self, new_raw_entity: model.EntityRawEntity):
+        new_link = orm.EntityRawEntityORM(**asdict(new_raw_entity))
+        self.session.add(new_link)
+        self.session.flush()
+
+    def add_document_entity(self, new_document_entity: model.DocumentEntity):
+        new_link = orm.DocumentEntityORM(**asdict(new_document_entity))
         self.session.add(new_link)
         self.session.flush()
 
     def _list(self):
         entity_objs = self.session.query(orm.EntityORM).all()
-        return [model.Entity.model_validate(r_e) for r_e in entity_objs]
+        return [model.Entity.model_validate(r_e.to_dict()) for r_e in entity_objs]
     
     def _update(self, updated_obj: model.Entity, fields: List[str]):
         entity_obj: ORM_OBJECT = self.session.query(orm.EntityORM).filter_by(id=updated_obj.id).one()

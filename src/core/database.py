@@ -90,7 +90,8 @@ def create_database(db_path):
         CREATE TABLE Entities (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         entity_name TEXT,
-        entity_description TEXT
+        entity_description TEXT,
+        UNIQUE (entity_name)
         );
 
         CREATE TABLE DocumentEntities (
@@ -109,6 +110,15 @@ def create_database(db_path):
         FOREIGN KEY (raw_entity_id) REFERENCES RawEntities(id)
         );
 
+        CREATE TABLE changelogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        modified_datetime REAL, 
+        previous_object_json TEXT, 
+        revised_object_json TEXT, 
+        entity_name TEXT, 
+        entity_id INTEGER
+        );
+
         """
         cursor.executescript(sql_script)
 
@@ -123,4 +133,3 @@ def create_database(db_path):
 
 if __name__ == "__main__":
     create_database(config.DATABASE_PATH)
-    

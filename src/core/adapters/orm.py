@@ -140,8 +140,8 @@ class ChangelogORM(Base):
     modified_datetime = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
     previous_object_json = Column(String)
     revised_object_json = Column(String)
-    source_table_name = Column(String)
-    source_id = Column(Integer)
+    entity_name = Column(String)
+    entity_id = Column(Integer)
 
 DocumentORM.raw_topics = relationship('RawTopicORM', back_populates='document')
 DocumentORM.document_topics = relationship('DocumentTopicORM', back_populates='document')

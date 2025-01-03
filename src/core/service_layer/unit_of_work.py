@@ -31,7 +31,7 @@ class AbstractUnitOfWork(abc.ABC):
         self._commit()
 
     def collect_new_events(self):
-        for repository in [self.documents, self.comments]:
+        for repository in [self.documents, self.comments, self.raw_topics, self.raw_entities, self.topics, self.entities]:
             for object in repository.seen:
                 while object.events:
                     yield object.events.pop(0)

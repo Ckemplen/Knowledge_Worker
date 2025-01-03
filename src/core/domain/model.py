@@ -1,7 +1,11 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional, List, NamedTuple
+from typing import Optional, List, NamedTuple, ForwardRef
 from . import events
+from dataclasses import dataclass
+
+class DomainDataclass:
+    pass
 
 class Document(BaseModel):
     id: int
@@ -50,8 +54,10 @@ class Document(BaseModel):
         from_attributes = True
         arbitrary_types_allowed = True
         json_encoders = {
-            'Document': lambda v: v.dict(exclude={'next_versions', 'previous_versions', 'comments'})
+            'Document': lambda v: v.dict(exclude={'next_versions', 'previous_versions', 'comments'}),
+            datetime: lambda v: v.isoformat() 
         }
+
 
 class Comment(BaseModel):
     id: int
@@ -61,13 +67,16 @@ class Comment(BaseModel):
     comment_text: str
     comment_date: datetime
     events: Optional[List] = []
-    document: Optional[Document] = None
+    # document: Optional['Document'] = None
 
     def __hash__(self):
         return hash((self.id, self.document_id, self.author, self.comment_date))
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() 
+        }
 
 class RawTopic(BaseModel):
     id: int
@@ -75,7 +84,8 @@ class RawTopic(BaseModel):
     topic_name: str
     topic_description: str
     topic_prevalence: int
-    document: Optional[Document] = None
+    # document: Optional['Document'] = None
+    events: Optional[List] = []
 
     def __hash__(self):
         return hash((self.id, self.document_id, self.topic_description))
@@ -89,36 +99,11 @@ class Topic(BaseModel):
     topic_description: str
     document_topics: Optional[List['DocumentTopic']] = []
     raw_topics: Optional[List['TopicRawTopic']] = []
+    events: Optional[List] = []
 
     
     def __hash__(self):
         return hash((self.id, self.topic_description))
-
-    class Config:
-        from_attributes = True
-
-class DocumentTopic(BaseModel):
-    document_id: int
-    topic_id: int
-    document: Optional[Document] = None
-    topic: Optional[Topic] = None
-
-    
-    def __hash__(self):
-        return hash((self.topic_id, self.document_id))
-
-    class Config:
-        from_attributes = True
-
-class TopicRawTopic(BaseModel):
-    topic_id: int
-    raw_topic_id: int
-    topic: Optional[Topic] = None
-    raw_topic: Optional[RawTopic] = None
-
-    
-    def __hash__(self):
-        return hash((self.topic_id, self.raw_topic_id))
 
     class Config:
         from_attributes = True
@@ -129,7 +114,8 @@ class RawEntity(BaseModel):
     entity_name: str
     entity_description: str
     entity_prevalence: int
-    document: Optional[Document] = None
+    # document: Optional['Document'] = None
+    events: Optional[List] = []
 
     def __hash__(self):
         return hash((self.id, self.document_id, self.entity_description))
@@ -141,8 +127,9 @@ class Entity(BaseModel):
     id: int
     entity_name: str
     entity_description: str
-    document_entities: Optional[List['DocumentEntity']] = []
-    raw_entities: Optional[List['EntityRawEntity']] = []
+    # document_entities: Optional[List['DocumentEntity']] = []
+    # raw_entities: Optional[List['EntityRawEntity']] = []
+    events: Optional[List] = []
 
     
     def __hash__(self):
@@ -151,31 +138,60 @@ class Entity(BaseModel):
     class Config:
         from_attributes = True
 
-class DocumentEntity(BaseModel):
+@dataclass
+class DocumentTopic(DomainDataclass):
+    document_id: int
+    topic_id: int
+    # document: Optional['Document'] = None
+    # topic: Optional['Topic'] = None
+
+    
+    def __hash__(self):
+        return hash((self.topic_id, self.document_id))
+
+    # class Config:
+    #     from_attributes = True
+
+@dataclass
+class TopicRawTopic(DomainDataclass):
+    topic_id: int
+    raw_topic_id: int
+    # topic: Optional['Topic'] = None
+    # raw_topic: Optional['RawTopic'] = None
+    
+    def __hash__(self):
+        return hash((self.topic_id, self.raw_topic_id))
+
+    # class Config:
+    #     from_attributes = True
+
+@dataclass
+class DocumentEntity(DomainDataclass):
     document_id: int
     entity_id: int
-    document: Optional[Document] = None
-    entity: Optional[Entity] = None
+    # document: Optional['Document'] = None
+    # entity: Optional['Entity'] = None
 
     
     def __hash__(self):
         return hash((self.entity_id, self.document_id))
 
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
-class EntityRawEntity(BaseModel):
+@dataclass
+class EntityRawEntity(DomainDataclass):
     entity_id: int
     raw_entity_id: int
-    entity: Optional[Entity] = None
-    raw_entity: Optional[RawEntity] = None
+    # entity: Optional['Entity'] = None
+    # raw_entity: Optional['RawEntity'] = None
 
     
     def __hash__(self):
         return hash((self.entity_id, self.raw_entity_id))
 
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
 class DocxComment(NamedTuple):
     reference_text: str

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, List, Tuple, Dict
 from datetime import datetime
+from core.adapters.llm_connectors import CanonicalEntityResponseItem
 
 class Event:
     pass
@@ -19,3 +20,8 @@ class DocumentProcessed(Event):
 class CommentCreated(Event):
     comment_id: int
     document_id: int
+
+@dataclass
+class ExistingCanonicalEntityHallucination(Event):
+    item: CanonicalEntityResponseItem
+    entity_id: int

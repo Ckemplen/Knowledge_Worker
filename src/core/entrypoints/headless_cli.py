@@ -74,4 +74,18 @@ if __name__ == "__main__":
 
     create_database(DATABASE_PATH)
 
-    process_file_list(FILE_LIST)
+   #process_file_list(FILE_LIST)
+
+    bus.handle(message=core.domain.commands.ConsolidateCanonicalEntities(
+        entity_ids=None,
+        raw_entity_ids=None,
+        )
+    )
+
+
+# list(
+#             range(
+#                 70, 121
+#                 )
+#             )
+
