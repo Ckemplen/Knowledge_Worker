@@ -8,4 +8,4 @@ src/core.egg-info
 src/core/__pycache__
 src/build
 __pycache__
-*.json
+seed_canonical_topics.json

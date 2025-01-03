@@ -1,0 +1,80 @@
+{
+    "type": "object",
+    "properties": {
+      "document_analysis": {
+        "type": "object",
+        "properties": {
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "prevalence": {
+                  "type": "number"
+                },
+                "subtopics": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "prevalence": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "description",
+                      "prevalence"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "description",
+                "prevalence",
+                "subtopics"
+              ]
+            }
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "prevalence": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "description",
+                "prevalence"
+              ]
+            }
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }

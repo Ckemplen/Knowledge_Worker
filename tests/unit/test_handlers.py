@@ -7,7 +7,7 @@ import pytest
 from core import bootstrap
 from core.domain import commands, model, events
 from core.service_layer import handlers
-from core.adapters import repository
+from core.adapters import repository, llm_connectors
 from core.service_layer import unit_of_work
 from dataclasses import asdict
 
@@ -81,7 +81,9 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
 
 def bootstrap_test_app():
     return bootstrap.bootstrap(
-        uow=FakeUnitOfWork()
+        uow=FakeUnitOfWork(),
+        document_analysis_connector=llm_connectors.FakeDocumentAnalysisConnector(),
+        canonical_entity_consolidation_connector=None,
     )
 
 
