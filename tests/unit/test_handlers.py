@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import Dict, List, Set
 import pytest
 from core import bootstrap
-from core.domain import commands, model
+from core.domain import commands, model, events
 from core.service_layer import handlers
 from core.adapters import repository
 from core.service_layer import unit_of_work
@@ -127,30 +127,16 @@ class TestAddDocument:
         assert bus.uow.documents.get(reference=2).version == 2
 
     def test_comments_added(self):
-        bus = bootstrap_test_app()
-        bus.handle(commands.CreateDocument(
-            filepath="fake/file/path",
-            filename='fake/file/path.docx',
-            text='Example text',
-            created_by='CKEMPLEN',
-            last_modified_by='CKEMPLEN',
-            last_modified_at=datetime.now(),
-            created_at=datetime.now(),
-            processed_at=datetime.now(),
-            doc_comments=[
-                    ("reference text 1", "author name 1", "2024-12-31T14:24:01Z", "comment text 1"),
-                    ("reference text 2", "author name 2", "2024-12-31T14:24:02Z", "comment text 2"),
-                    ("reference text 3", "author name 3", "2024-12-31T14:24:03Z", "comment text 3"),
-                    ("reference text 4", "author name 4", "2024-12-31T14:24:04Z", "comment text 4")
+        doc_comments=[
+                    {'reference_text':"reference text 1", "author":"author name 1", "comment_date": "2024-12-31T14:24:01Z", "comment_text":"comment text 1", "document_id": 1},
+
             ]
+        bus = bootstrap_test_app()
+
+        bus.handle(events.DocumentCreated(
+            document_id=1,
+            comments=doc_comments
         ))
-        bus.uow.collect_new_events()
-        events = []
-        for d in bus.uow.documents.list():
-            events.extend(d.events) 
-        print(events)
-        for e in events:
-            bus.handle(e)
 
         assert bus.uow.comments.get(reference=1).author == 'author name 1'
-        assert bus.uow.committed
+

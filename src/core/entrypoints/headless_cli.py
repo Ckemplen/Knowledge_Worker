@@ -4,6 +4,7 @@ from docx2python import docx2python
 
 from core.database import create_database
 from core.service_layer.unit_of_work import SqlAlchemyUnitOfWork
+from core.adapters.llm_connectors import DocumentAnalysisConnector, CanonicalEntityConsolidationConnector
 import core.bootstrap
 
 import core.domain.commands
@@ -44,8 +45,6 @@ def create_document_from_docx(file_path):
     html_text = docx2python(file_path, html=True).text
 
     file_name = os.path.basename(file_path)
-    
-    print(doc.properties)
 
     create_new_document = core.domain.commands.CreateDocument(
         filepath=file_path,
@@ -67,7 +66,11 @@ def create_document_from_docx(file_path):
 
 if __name__ == "__main__":
     
-    bus = core.bootstrap.bootstrap(uow=SqlAlchemyUnitOfWork())
+    bus = core.bootstrap.bootstrap(
+        uow=SqlAlchemyUnitOfWork(), 
+        document_analysis_connector=DocumentAnalysisConnector(),
+        canonical_entity_consolidation_connector=CanonicalEntityConsolidationConnector()
+        )
 
     create_database(DATABASE_PATH)
 

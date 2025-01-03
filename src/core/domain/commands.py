@@ -1,48 +1,9 @@
-from dataclasses import dataclass, make_dataclass
-from typing import Optional, List, Tuple
+from dataclasses import dataclass
+from typing import Optional, List, Tuple, Union
 from datetime import datetime
-
-# from schema import And, Schema, Use
-# import json
-
-
-# def command(name, **fields):
-#     schema = Schema(And(Use(json.loads), fields), ignore_extra_keys=True)
-#     cls = make_dataclass(name, fields.keys())
-#     cls.from_json = lambda s: cls(**schema.validate(s))
-#     return cls
-
-# def greater_than_zero(x):
-#     return x > 0
-
-# quantity = And(Use(int), greater_than_zero)
 
 class Command:
     pass
-
-# CreateDocument: Command = command(
-#     'CreateDocument',
-#     filepath=str,
-#     filename=str,
-#     text=str,
-#     html_text=Optional[str],
-#     last_modified_at=datetime,
-#     created_at=datetime,
-#     processed_at=datetime,
-#     created_by=str,
-#     last_modified_by=str,
-#     revision=Optional[int],
-#     filetype=Optional[str],
-#     version_comment=Optional[str],
-#     doc_comments=Optional[List[Tuple]]
-# )
-
-# ProcessDocument: Command = command(
-#     'ProcessDocument',
-#     document_id=int
-#     )
-
-
 
 @dataclass
 class CreateDocument(Command):
@@ -65,4 +26,10 @@ class CreateDocument(Command):
 @dataclass
 class ProcessDocument(Command):
     document_id: int
-    
+
+@dataclass    
+class ConsolidateCanonicalEntities(Command):
+    """Pass in list of specific ids, or leave as None to review all."""
+    entity_ids: Union[List[int], None]
+    raw_entity_ids: Union[List[int], None]
+

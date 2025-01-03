@@ -16,6 +16,10 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
 class AbstractUnitOfWork(abc.ABC):
     documents: repository.AbstractRepository
     comments: repository.AbstractRepository
+    raw_topics: repository.AbstractRepository
+    raw_entities: repository.AbstractRepository
+    topics: repository.AbstractRepository
+    entities: repository.AbstractRepository
 
     def __enter__(self):
         return self
@@ -50,6 +54,10 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.session = self.session_factory()  
         self.documents = repository.SqlAlchemyDocumentRepository(self.session) 
         self.comments = repository.SqlAlchemyCommentRepository(self.session)
+        self.raw_topics = repository.SqlAlchemyRawTopicsRepository(self.session)
+        self.raw_entities = repository.SqlAlchemyRawEntitiesRepository(self.session)
+        self.topics = repository.SqlAlchemyTopicsRepository(self.session)
+        self.entities = repository.SqlAlchemyEntitiesRepository(self.session)
         return self  # Return self to use the context manager
 
     def __exit__(self, *args):
@@ -75,6 +83,7 @@ class FakeUnitOfWork(AbstractUnitOfWork):
     def __enter__(self):
         self.documents = repository.FakeDocumentRepository(documents=[]) 
         self.comments = repository.FakeCommentRepository(comments=[])
+        
         return self  # Return self to use the context manager
 
     def __exit__(self, *args):

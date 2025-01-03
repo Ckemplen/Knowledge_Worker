@@ -52,7 +52,8 @@ def create_database(db_path):
         document_id INTEGER NOT NULL,
         topic_name TEXT,
         topic_description TEXT,
-        topic_prevalence INTEGER
+        topic_prevalence INTEGER,
+        FOREIGN KEY (document_id) REFERENCES Documents(id)
         );
 
         CREATE TABLE Topics (
@@ -82,7 +83,8 @@ def create_database(db_path):
         document_id INTEGER NOT NULL,
         entity_name TEXT,
         entity_description TEXT,
-        entity_prevalence INTEGER
+        entity_prevalence INTEGER,
+        FOREIGN KEY (document_id) REFERENCES Documents(id)
         );
 
         CREATE TABLE Entities (
@@ -119,3 +121,6 @@ def create_database(db_path):
     finally:
         conn.close()
 
+if __name__ == "__main__":
+    create_database(config.DATABASE_PATH)
+    
