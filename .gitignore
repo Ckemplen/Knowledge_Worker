@@ -13,4 +13,4 @@ csv_backups
 message_bus_log.json
 test_canon_outputs.json
 filelist_longer.txt
-filelist.txt
+.pytest_cache
