@@ -116,7 +116,8 @@ def create_database(db_path):
         previous_object_json TEXT, 
         revised_object_json TEXT, 
         entity_name TEXT, 
-        entity_id INTEGER
+        entity_id INTEGER,
+        UNIQUE(entity_name, entity_id, pervious_object_json)
         );
 
         """
