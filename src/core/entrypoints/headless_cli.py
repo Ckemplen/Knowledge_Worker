@@ -10,7 +10,7 @@ import core.bootstrap
 import core.domain.commands
 import core.service_layer.messagebus
 
-from core.config import DATABASE_PATH, FILE_LIST
+from core.config import DATABASE_PATH
 
 
 def process_file_list(file_list_path):
@@ -27,7 +27,6 @@ def process_file_list(file_list_path):
             print("Warning: File not found: {file_path}")
             continue
 
-        file_name = os.path.basename(file_path)
         file_type = os.path.splitext(file_path)[1].lower()
 
         if file_type != ".docx":

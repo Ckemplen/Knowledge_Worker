@@ -1,0 +1,29 @@
+<div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="entities-tab">
+    <h2 class="govuk-heading-l">Entities</h2>
+
+    <table class="govuk-table">
+
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Entity Name</th>
+                <th scope="col" class="govuk-table__header"></th>
+                <th scope="col" class="govuk-table__header"></th>
+            </tr>
+        </thead>
+
+        <tbody class="govuk-table__body">
+            {% if entities %}
+            
+            {% for entity in entities %}
+            {% include "components/entity_row.html" %}
+            {% endfor %}
+
+            {% else %}
+            <p class="govuk-body">No entities found.</p>
+            {% endif %}
+
+        </tbody>
+
+    </table>
+
+</div>

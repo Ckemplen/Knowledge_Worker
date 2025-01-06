@@ -1,16 +1,31 @@
-db.sqlite
-.venv
-breadboard.ipynb
-.env
-*.docx
-filelist.txt
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 src/core.egg-info
 src/core/__pycache__
 src/build
 __pycache__
+.pytest_cache
+.ruff_cache
+
+# Virtual environments
+.venv
+
+# Local db / secrets
+.env
+db.sqlite
+
+# Test inputs/data
 seed_canonical_topics.json
 csv_backups
 message_bus_log.json
 test_canon_outputs.json
 filelist_longer.txt
-.pytest_cache
+test_inputs
+*.docx
+filelist.txt
+breadboard.ipynb

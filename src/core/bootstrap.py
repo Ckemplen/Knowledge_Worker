@@ -1,10 +1,8 @@
 import inspect
-from typing import Callable
-from core.adapters import orm, llm_connectors
+from core.adapters import llm_connectors
 
 from core.service_layer import handlers, messagebus, unit_of_work
 
-import inspect
 
 def bootstrap(
     uow: unit_of_work.AbstractUnitOfWork,

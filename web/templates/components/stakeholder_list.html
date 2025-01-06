@@ -1,0 +1,42 @@
+<div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="stakeholders-tab">
+    <h2 class="govuk-heading-l">Stakeholders</h2>
+
+    <table class="govuk-table">
+
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Stakeholder Name</th>
+                <th scope="col" class="govuk-table__header"></th>
+                <th scope="col" class="govuk-table__header"></th>
+            </tr>
+        </thead>
+
+        <tbody class="govuk-table__body" id="stakeholders">
+            {% if stakeholders %}
+            
+            {% for stakeholder in stakeholders %}
+            {% include "components/stakeholder_row.html" %}
+            {% endfor %}
+
+            {% else %}
+            <p class="govuk-body">No stakeholders found.</p>
+            {% endif %}
+
+        </tbody>
+
+    </table>
+
+        
+    <form hx-post="/stakeholders" hx-target="#stakeholders" hx-swap="outerHTML">
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="stakeholder_name">Name</label>
+            <input class="govuk-input" id="stakeholder_name" name="stakeholder_name" type="text">
+        </div>
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="stakeholder_type">Type</label>
+            <input class="govuk-input" id="stakeholder_type" name="stakeholder_type" type="text">
+        </div>
+        <button class="govuk-button" type="submit">Add Stakeholder</button>
+    </form>
+
+</div>

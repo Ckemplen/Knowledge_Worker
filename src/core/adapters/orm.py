@@ -112,7 +112,16 @@ class EntityORM(Base):
     
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-    
+
+class StakeholderORM(Base):
+    __tablename__ = 'Stakeholders'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    stakeholder_name = Column(String)
+    stakeholder_type = Column(String)
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 class DocumentEntityORM(Base):
     __tablename__ = 'DocumentEntities'
     document_id = Column(Integer, ForeignKey('Documents.id'), primary_key=True)

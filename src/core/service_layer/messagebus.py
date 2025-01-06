@@ -60,12 +60,15 @@ class MessageBus:
             message = self.queue.pop(0)
             self.metrics["queue_length"] = len(self.queue)
             logger.info(f"Processing message: {message.__class__.__name__}, Queue length: {self.metrics['queue_length']}")
-
+            print(f"Message type: {type(message)}")
             if isinstance(message, events.Event):
+                print("Is an event")
                 self.handle_event(message)
             elif isinstance(message, commands.Command):
+                print("Is a command.")
                 self.handle_command(message)
             else:
+                print(type(message))
                 raise Exception(f"{message.__class__.__name__} was not an Event or Command")
 
     def handle_event(self, event: events.Event):
@@ -100,9 +103,11 @@ class MessageBus:
             self.metrics["failed_messages"] += 1
 
     def handle_command(self, command: commands.Command):
+        print("Command handler called.")
         logger.debug("Handling command %s", command.__class__.__name__)
         try:
             handler_name, handler = self.command_handlers[type(command)]
+            print(handler_name, handler)
             logger.debug(f"Handling command {command.__class__.__name__} with command handler: {handler_name}.")
             handler(command)
             self.queue.extend(self.uow.collect_new_events())

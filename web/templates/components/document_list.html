@@ -1,0 +1,41 @@
+<div class="govuk-tabs__panel govuk-tabs__panel" id="documents-tab">
+    <h2 class="govuk-heading-l">Documents</h2>
+
+    <table class="govuk-table">
+
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Document Name</th>
+                <th scope="col" class="govuk-table__header"></th>
+                <th scope="col" class="govuk-table__header"></th>
+            </tr>
+        </thead>
+
+        <tbody class="govuk-table__body">
+            {% if documents %}
+
+            {% for document in documents %}
+            {% include "components/document_row.html" %}
+            {% endfor %}
+
+            {% else %}
+            <p class="govuk-body">No documents found.</p>
+            {% endif %}
+
+        </tbody>
+
+    </table>
+    
+    <form hx-post="/documents" hx-target="#documents" hx-swap="outerHTML">
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="filename">Filename</label>
+            <input class="govuk-input" id="filename" name="filename" type="text">
+        </div>
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="filepath">Filepath</label>
+            <input class="govuk-input" id="filepath" name="filepath" type="text">
+        </div>
+        <button class="govuk-button" type="submit">Add Document</button>
+    </form>
+    
+</div>

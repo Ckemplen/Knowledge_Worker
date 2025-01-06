@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List, Tuple, Dict
-from datetime import datetime
+from typing import Optional, List, Dict
 from core.adapters.llm_connectors import CanonicalEntityResponseItem
 
 class Event:

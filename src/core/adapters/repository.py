@@ -2,8 +2,7 @@ import abc
 import core.domain.model as model
 import core.domain.commands as commands
 import core.adapters.orm as orm
-import core.domain.events as events
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 from datetime import datetime
 import json
 
@@ -29,6 +28,7 @@ def log_change(session, entity_name, entity_id, previous_object, revised_object)
 ORM_OBJECT = Union[None, orm.DocumentEntityORM, orm.DocumentORM, orm.DocumentTopicORM, orm.CommentORM, orm.RawEntityORM, orm.RawTopicORM, orm.TopicRawTopicORM, orm.EntityRawEntityORM]
 PYDANTIC_OBJECT = Union[None, model.Document, model.Comment, model.RawEntity, model.RawTopic]
 DOMAIN_DATACLASS = Union[None, model.DocumentEntity, model.DocumentTopic, model.TopicRawTopic, model.EntityRawEntity]
+
 class AbstractRepository(abc.ABC):
     def __init__(self):
         self.seen = set()
@@ -256,6 +256,38 @@ class SqlAlchemyEntitiesRepository(AbstractRepository):
             if key not in fields:
                 continue
             setattr(entity_obj, key, value)
+
+        self.session.commit()
+
+        return updated_obj
+    
+
+class SqlAlchemyStakeholderRepository(AbstractRepository):
+    def __init__(self, session):
+        self.seen = set()
+        self.session = session
+
+    def _add(self, cmd: commands.AddStakeholder):
+        orm_stakeholder = orm.StakeholderORM(**asdict(cmd))
+        self.session.add(orm_stakeholder)
+        self.session.flush()
+        pydantic_stakeholder = model.Stakeholder(**orm_stakeholder.to_dict())
+        return pydantic_stakeholder
+
+    def _get(self, reference):
+        stakeholder_obj = self.session.query(orm.StakeholderORM).filter_by(id=reference).one()
+        return model.Stakeholder.model_validate(stakeholder_obj)
+
+    def _list(self):
+        stakeholder_objs = self.session.query(orm.StakeholderORM).all()
+        return [model.Stakeholder.model_validate(s) for s in stakeholder_objs]
+
+    def _update(self, updated_obj: model.Stakeholder, fields: List[str]):
+        stakeholder_obj: ORM_OBJECT = self.session.query(orm.StakeholderORM).filter_by(id=updated_obj.id).one()
+        for key, value in dict(updated_obj).items():
+            if key not in fields:
+                continue
+            setattr(stakeholder_obj, key, value)
 
         self.session.commit()
 

@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv('.env') 
 
-DATABASE_PATH = r"C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite"
-FILE_LIST = r"C:\Users\ckemplen\POLICY_DEVELOPMENT_APP\filelist.txt"
+DATABASE_PATH = os.getenv('DB_URI')
+FILE_LIST=os.getenv('FILE_LIST')
 
 DB_URI = os.getenv('DB_URI')
 DB_ECHO = os.getenv('DB_ECHO')

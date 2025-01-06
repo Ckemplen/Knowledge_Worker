@@ -20,6 +20,7 @@ class AbstractUnitOfWork(abc.ABC):
     raw_entities: repository.AbstractRepository
     topics: repository.AbstractRepository
     entities: repository.AbstractRepository
+    stakeholders: repository.AbstractRepository
 
     def __enter__(self):
         return self
@@ -31,8 +32,8 @@ class AbstractUnitOfWork(abc.ABC):
         self._commit()
 
     def collect_new_events(self):
-        for repository in [self.documents, self.comments, self.raw_topics, self.raw_entities, self.topics, self.entities]:
-            for object in repository.seen:
+        for repo in [self.documents, self.comments, self.raw_topics, self.raw_entities, self.topics, self.entities]:
+            for object in repo.seen:
                 while object.events:
                     yield object.events.pop(0)
 
@@ -58,6 +59,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.raw_entities = repository.SqlAlchemyRawEntitiesRepository(self.session)
         self.topics = repository.SqlAlchemyTopicsRepository(self.session)
         self.entities = repository.SqlAlchemyEntitiesRepository(self.session)
+        self.stakeholders = repository.SqlAlchemyStakeholderRepository(self.session)
         return self  # Return self to use the context manager
 
     def __exit__(self, *args):
@@ -83,7 +85,11 @@ class FakeUnitOfWork(AbstractUnitOfWork):
     def __enter__(self):
         self.documents = repository.FakeDocumentRepository(documents=[]) 
         self.comments = repository.FakeCommentRepository(comments=[])
-        
+        self.raw_topics = repository.FakeRawTopicsRepository(raw_topics=[])
+        self.raw_entities = repository.FakeRawEntitiesRepository(raw_entities=[])
+        self.topics = repository.FakeTopicsRepository(topics=[])
+        self.entities = repository.FakeEntitiesRepository(entities=[])
+        self.stakeholders = repository.FakeStakeholderRepository(stakeholders=[])
         return self  # Return self to use the context manager
 
     def __exit__(self, *args):

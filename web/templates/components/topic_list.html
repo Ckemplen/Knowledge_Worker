@@ -1,0 +1,29 @@
+<div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="topics-tab">
+    <h2 class="govuk-heading-l">Topics</h2>
+
+    <table class="govuk-table">
+
+        <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header">Topic Name</th>
+                <th scope="col" class="govuk-table__header"></th>
+                <th scope="col" class="govuk-table__header"></th>
+            </tr>
+        </thead>
+
+        <tbody class="govuk-table__body">
+            {% if topics %}
+            
+            {% for topic in topics %}
+            {% include "components/topic_row.html" %}
+            {% endfor %}
+
+            {% else %}
+            <p class="govuk-body">No topics found.</p>
+            {% endif %}
+
+        </tbody>
+
+    </table>
+
+</div>

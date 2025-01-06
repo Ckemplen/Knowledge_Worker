@@ -1,7 +1,6 @@
 import core.domain.commands as commands
 import core.domain.events as events
-from core.domain.model import Document, Entity, RawEntity, EntityRawEntity, DocumentEntity
-from typing import List
+from core.domain.model import Document, Entity, EntityRawEntity, DocumentEntity
 import core.service_layer.unit_of_work as uow
 from core.adapters.llm_connectors import DocumentAnalysisResponse, CanonicalEntityResponse, AbstractConnector
 import json
@@ -50,7 +49,7 @@ def add_document_comments(
                 uow.comments.add(comment)
 
             except Exception as e:
-                print(f"Error occurred adding comments to db.")
+                print("Error occurred adding comments to db.")
                 print(e)
                 uow.rollback()
             finally:
@@ -103,7 +102,7 @@ def get_document_topics_entities_and_summary(
             uow.documents.update(updated_obj=doc, fields=['no ORM field to update, just adding an event to the uow...'])            
 
         except Exception as e:
-            print(f"Error occurred getting topics, entities and summary.")
+            print("Error occurred getting topics, entities and summary.")
             print(e)
             uow.rollback()
         finally:
@@ -200,6 +199,9 @@ class EntityCreationError(EntityProcessingError):
     pass
 
 class EntityUpdateError(EntityProcessingError):
+    pass
+
+class AddStakeholderError(Exception):
     pass
 
 def consolidate_canonical_entities(event: commands.ConsolidateCanonicalEntities,
@@ -315,6 +317,18 @@ def log_hallucination(event: events.ExistingCanonicalEntityHallucination):
     print("Item: ", event.item)
     print("New entity id: ", event.entity_id)
 
+def add_stakeholder(cmd: commands.AddStakeholder, uow: uow.AbstractUnitOfWork):
+    print("Using add_stakeholder handler.")
+    with uow:
+        try:
+            uow.stakeholders.add(cmd)
+        except Exception as e:
+            print("Error occurred adding stakeholder.")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
 EVENT_HANDLERS = {
    events.DocumentCreated: [
        ("add_document_comments",add_document_comments), 
@@ -327,5 +341,6 @@ EVENT_HANDLERS = {
 
 COMMAND_HANDLERS = {
     commands.CreateDocument: ("add_new_document", add_new_document),
-    commands.ConsolidateCanonicalEntities: ("consolidate_canonical_entities", consolidate_canonical_entities)
+    commands.ConsolidateCanonicalEntities: ("consolidate_canonical_entities", consolidate_canonical_entities),
+    commands.AddStakeholder: ("add_stakeholder", add_stakeholder),
 }

@@ -16,6 +16,13 @@ def create_database(db_path):
 
     
         sql_script = """
+        CREATE TABLE Stakeholders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        stakeholder_name TEXT,
+        stakeholder_type TEXT,
+        UNIQUE (stakeholder_name)
+        );
+
         CREATE TABLE  Documents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         filepath TEXT NOT NULL,
@@ -117,7 +124,7 @@ def create_database(db_path):
         revised_object_json TEXT, 
         entity_name TEXT, 
         entity_id INTEGER,
-        UNIQUE(entity_name, entity_id, pervious_object_json)
+        UNIQUE(entity_name, entity_id, previous_object_json)
         );
 
         """
@@ -133,4 +140,4 @@ def create_database(db_path):
         conn.close()
 
 if __name__ == "__main__":
-    create_database(config.DATABASE_PATH)
+    create_database("C:/Users/chris/OneDrive/KNOWLEDGE-WORKER/Knowledge_Worker/db.sqlite")

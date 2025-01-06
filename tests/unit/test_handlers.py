@@ -1,12 +1,9 @@
 # pylint: disable=no-self-use
 from __future__ import annotations
-from collections import defaultdict
-from datetime import date, datetime
-from typing import Dict, List, Set
-import pytest
+from datetime import datetime
+from typing import Set
 from core import bootstrap
 from core.domain import commands, model, events
-from core.service_layer import handlers
 from core.adapters import repository, llm_connectors
 from core.service_layer import unit_of_work
 from dataclasses import asdict
@@ -35,7 +32,7 @@ class FakeDocumentsRepository(repository.AbstractRepository):
     def get(self, reference):
         return next((d for d in self._documents if d.id == reference), None)
     
-    def list(self):
+    def _list(self):
         return self._documents
 
     def get_by_comment_id(self, reference):
@@ -61,6 +58,9 @@ class FakeCommentsRepository(repository.AbstractRepository):
 
     def get(self, reference):
         return next((c for c in self._comments if c.id == reference), None)
+    
+    def _list(self):
+        return self._comments
 
 class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
     def __init__(self):

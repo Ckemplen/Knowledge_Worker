@@ -1,13 +1,12 @@
 import requests
 import abc
-import random
 import json
 import tiktoken
 import datetime
 import logging
 import core.config as config
 
-from typing import TypedDict, List, Dict, Optional, NotRequired
+from typing import TypedDict, List, Dict, NotRequired
 
 logging.basicConfig(level=logging.INFO)
 

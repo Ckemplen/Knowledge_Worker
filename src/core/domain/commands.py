@@ -33,3 +33,8 @@ class ConsolidateCanonicalEntities(Command):
     entity_ids: Union[List[int], None]
     raw_entity_ids: Union[List[int], None]
 
+@dataclass
+class AddStakeholder(Command):
+    stakeholder_name: str
+    stakeholder_type: str
+    

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional, List, NamedTuple, ForwardRef
+from typing import Optional, List, NamedTuple
 from . import events
 from dataclasses import dataclass
 
@@ -135,6 +135,17 @@ class Entity(BaseModel):
     def __hash__(self):
         return hash((self.id, self.entity_name, self.entity_description))
 
+    class Config:
+        from_attributes = True
+
+class Stakeholder(BaseModel):
+    id: int
+    stakeholder_name: str
+    stakeholder_type: str
+
+    def __hash__(self):
+        return hash((self.id, self.stakeholder_name, self.stakeholder_type))
+    
     class Config:
         from_attributes = True
 

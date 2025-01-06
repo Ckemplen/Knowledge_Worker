@@ -1,0 +1,38 @@
+<div class="govuk-tabs" data-module="govuk-tabs">
+
+    <h2 class="govuk-tabs__title">
+      Contents
+    </h2>
+
+    <ul class="govuk-tabs__list">
+      <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+        <a class="govuk-tabs__tab" href="#documents-tab">
+          Documents
+        </a>
+      </li>
+
+      <li class="govuk-tabs__list-item">
+        <a class="govuk-tabs__tab" href="#topics-tab">
+          Topics
+        </a>
+      </li>
+
+      <li class="govuk-tabs__list-item">
+        <a class="govuk-tabs__tab" href="#entities-tab">
+          Entities
+        </a>
+      </li>
+
+      <li class="govuk-tabs__list-item">
+        <a class="govuk-tabs__tab" href="#stakeholders-tab">
+          Stakeholders
+        </a>
+      </li>
+    </ul>
+
+    {% include "components/document_list.html" %}
+    {% include "components/topic_list.html" %}
+    {% include "components/entity_list.html" %}
+    {% include "components/stakeholder_list.html" %}
+
+  </div>
