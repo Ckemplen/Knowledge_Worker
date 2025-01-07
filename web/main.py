@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -8,6 +8,7 @@ from core.adapters import llm_connectors
 from core.service_layer import messagebus, unit_of_work
 from core.domain import commands
 
+from typing import Dict, Union, List, Any
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
@@ -232,3 +233,78 @@ async def update_entity(
         status_code=200,  # Updated successfully
 
     )
+
+@app.get("/graph_data", response_model=None)
+async def get_graph_data(
+    request: Request, bus: messagebus.MessageBus = Depends(get_bus)
+) -> Dict[str, List[Dict[str, Any]]]:
+
+    documents = views.get_all_documents(bus.uow)
+    topics = views.get_all_topics(bus.uow)
+    entities = views.get_all_entities(bus.uow)
+    stakeholders = views.get_all_stakeholders(bus.uow)
+
+    nodes = []
+    edges = []
+
+    # Add documents as nodes
+    for document in documents:
+        nodes.append({
+            "id": f"document-{document.id}",
+            "label": document.filename,
+            "group": "document",
+            "data": document.model_dump()
+        })
+
+    # Add topics as nodes
+    for topic in topics:
+        nodes.append({
+            "id": f"topic-{topic.id}",
+            "label": topic.topic_name,
+            "group": "topic",
+            "data": topic.model_dump()
+        })
+
+    # Add entities as nodes
+    for entity in entities:
+        nodes.append({
+            "id": f"entity-{entity.id}",
+            "label": entity.entity_name,
+            "group": "entity",
+            "data": entity.model_dump()
+        })
+    
+    # Add stakeholders as nodes
+    for stakeholder in stakeholders:
+        nodes.append({
+            "id": f"stakeholder-{stakeholder.id}",
+            "label": stakeholder.stakeholder_name,
+            "group": "stakeholder",
+            "data": stakeholder.model_dump()
+        })
+
+    # # Create edges based on relationships (example: document-topic)
+    # for document in documents:
+    #     for topic in views.get_topics_for_document(bus.uow, document.id):  # Assuming this view function exists
+    #         edges.append({
+    #             "source": f"document-{document.id}",
+    #             "target": f"topic-{topic.id}"
+    #         })
+
+    # for topic in topics:
+    #   for entity in views.get_entities_for_topic(bus.uow, topic.id):
+    #     edges.append({
+    #             "source": f"topic-{topic.id}",
+    #             "target": f"entity-{entity.id}"
+    #         })
+
+    for document in documents:
+      for entity in document.entities:
+        edges.append({
+                "source": f"document-{document.id}",
+                "target": f"entity-{entity.id}"
+            })
+
+    # Add similar logic for other relationships (e.g., topic-entity, entity-stakeholder)
+
+    return {"nodes": nodes, "edges": edges}

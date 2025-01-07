@@ -1,0 +1,524 @@
+<style>
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+        cursor: pointer;
+    }
+
+    .link {
+        stroke: #999;
+        stroke-opacity: 0.6;
+        stroke-width: 1;
+    }
+
+    #chart {
+        width: 100%;
+        height: 600px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        position: relative;
+    }
+
+    #chart svg {
+        display: block;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        border-radius: 5px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #filter-controls {
+        margin-bottom: 20px;
+    }
+
+    #config-controls {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    #config-controls > div {
+        margin-right: 20px;
+        margin-bottom: 10px;
+    }
+
+    .node-group-document {
+        fill: #6baed6;
+    }
+
+    .node-group-topic {
+        fill: #d95f02;
+    }
+
+    .node-group-stakeholder {
+        fill: #2ca25f;
+    }
+
+    .node-group-entity {
+        fill: #e377c2;
+    }
+
+    .node-active {
+        stroke: #000;
+        stroke-width: 3px;
+    }
+
+    .link-active {
+        stroke: #000;
+        stroke-width: 3px;
+    }
+
+    .icon-text {
+        font-family: "Font Awesome 6 Free";
+        font-size: 24px;
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    .label-text {
+        font-family: sans-serif;
+        font-size: 10px;
+        text-anchor: middle;
+        dominant-baseline: central;
+        pointer-events: none;
+        fill: #000;
+    }
+
+    .tooltip {
+        position: absolute;
+        text-align: left;
+        width: auto;
+        padding: 8px;
+        font: 12px sans-serif;
+        background: #fff;
+        border: 1px solid #ddd;
+        pointer-events: none;
+        border-radius: 5px;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 10;
+    }
+
+    .tooltip p {
+        margin-bottom: 0.4em;
+    }
+
+    #center-button {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    .node-selected {
+        stroke: #000;
+        stroke-width: 3px;
+        fill: #fff;
+        r: 15px;
+    }
+
+    #context-menu {
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 5px;
+        display: none;
+         z-index: 11;
+    }
+     #context-menu > div {
+         padding: 5px;
+        cursor: pointer;
+    }
+    #context-menu > div:hover {
+        background-color: #eee;
+    }
+</style>
+
+<div id="filter-controls">
+    <label for="node-type-filter">Filter by Node Type:</label>
+    <select id="node-type-filter">
+        <option value="all">All</option>
+        <option value="document">Document</option>
+        <option value="topic">Topic</option>
+        <option value="stakeholder">Stakeholder</option>
+        <option value="entity">Entity</option>
+    </select>
+</div>
+    <div id="config-controls">
+        <div>
+            <label for="charge-strength" title="Controls the attractive or repulsive forces between nodes">Charge Strength:</label>
+            <input type="number" id="charge-strength" value="-200">
+        </div>
+        <div>
+            <label for="link-strength" title="Controls the strength of the links between nodes">Link Strength:</label>
+            <input type="number" id="link-strength" value="1">
+        </div>
+        <div>
+            <label for="link-distance" title="Controls the distance between connected nodes">Link Distance:</label>
+            <input type="number" id="link-distance" value="30">
+        </div>
+    </div>
+
+<div id="chart">
+     <button id="center-button" class="govuk-button govuk-button--secondary">Center</button>
+</div>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">×</span>
+        <h2 id="modal-title">Node Details</h2>
+        <div id="modal-info"></div>
+    </div>
+</div>
+
+ <div id="context-menu">
+        <div id="link-nodes-option">Link Nodes</div>
+</div>
+
+<script>
+    let nodes = [];
+    let edges = [];
+    let svg;
+    let simulation;
+    let link;
+    let node;
+    let selectedNodes = []; // Array to keep track of selected nodes
+     const chart = d3.select("#chart");
+    const width = chart.node().clientWidth;
+    const height = chart.node().clientHeight;
+    svg = chart.append("svg")
+        .attr("width", width)
+        .attr("height", height)
+         .on("click", clearSelection); // Clear selection when clicking on the svg background
+
+    const nodeTypeFilter = d3.select("#node-type-filter");
+    const modal = document.getElementById("modal");
+    const modalCloseButton = document.getElementsByClassName("close-modal")[0];
+    const contextMenu = d3.select("#context-menu");
+
+
+    // Tooltip setup
+    const tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+     const centerButton = d3.select("#center-button").on("click", centerGraph);
+
+     const chargeStrengthInput = d3.select("#charge-strength");
+    const linkStrengthInput = d3.select("#link-strength");
+    const linkDistanceInput = d3.select("#link-distance");
+
+    chargeStrengthInput.on("input", updateSimulation);
+    linkStrengthInput.on("input", updateSimulation);
+    linkDistanceInput.on("input", updateSimulation);
+
+
+  function updateSimulation() {
+     if (simulation) {
+           simulation
+              .force("charge", d3.forceManyBody().strength(chargeStrengthInput.property("value")))
+               .force("link", d3.forceLink(edges).id(d => d.id).strength(linkStrengthInput.property("value")).distance(linkDistanceInput.property("value")))
+                .alpha(1)
+                .restart();
+          }
+  }
+  function createGraph(data) {
+        nodes = data.nodes;
+        edges = data.edges;
+         // Remove any duplicate nodes based on id
+          const uniqueNodes = {};
+          nodes = nodes.filter(node => {
+             if (uniqueNodes[node.id]) {
+                return false;
+             }
+               uniqueNodes[node.id] = true
+              return true;
+          })
+
+        // Remove any duplicate edges
+        const uniqueEdges = {};
+        edges = edges.filter(edge => {
+            const edgeId = `${edge.source.id}-${edge.target.id}`;
+            if (uniqueEdges[edgeId] || uniqueEdges[`${edge.target.id}-${edge.source.id}`]) {
+                return false;
+            }
+            uniqueEdges[edgeId] = true;
+            return true;
+        });
+
+        simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(edges).id(d => d.id).strength(linkStrengthInput.property("value")).distance(linkDistanceInput.property("value")))
+            .force("charge", d3.forceManyBody().strength(chargeStrengthInput.property("value")))
+             .force("center", d3.forceCenter(width / 2, height / 2));
+
+
+         link = svg.append("g")
+           .attr("class", "links")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .selectAll("line")
+            .data(edges)
+            .join("line")
+            .attr("class", "link")
+            .attr("stroke-width", 1);
+
+
+        node = svg.append("g")
+            .attr("class", "nodes")
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1.5)
+            .selectAll("g")
+             .data(nodes)
+            .join("g")
+            .attr("class", d => `node-group-${d.group}`)
+             .call(d3.drag()
+                .on("start", dragstarted)
+                 .on("drag", dragged)
+                .on("end", dragended))
+            .on("mouseover", mouseoverNode)
+             .on("mousemove", mousemoveNode)
+            .on("mouseout", mouseoutNode)
+             .on("click", clickNode)
+           .on("contextmenu", rightClickNode)
+
+
+       node.append("circle")
+            .attr("r", 10)
+            .attr("class", d => `node`);
+
+         node.append("text")
+              .attr("class", "icon-text")
+               .text(d => {
+                   if (d.group === "document") return "\uf15c";
+                   if (d.group === "topic") return "\uf02c";
+                   if (d.group === "stakeholder") return "\uf007";
+                    if (d.group === "entity") return "\uf0c1";
+                   return "";
+                 })
+               .append("title")
+                .text(d => d.label)
+
+       node.append("text")
+          .attr("class", "label-text")
+          .attr("y", 20)
+           .text(d => d.label);
+
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+           node
+              .attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+    }
+ function centerGraph() {
+  if (simulation) {
+      simulation.force("center", d3.forceCenter(width/2, height/2))
+      simulation.alpha(1).restart()
+    }
+}
+
+ function mouseoverNode(event, d) {
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        node.filter(n => n === d)
+            .classed("node-active", true);
+        link.filter(l => l.source === d || l.target === d)
+            .classed("link-active", true);
+    }
+    function mousemoveNode(event, d) {
+         let detailsHTML = "";
+        if (d.group === "document") {
+            detailsHTML = `
+                <p><strong>Summary:</strong> ${d.data.summary}</p>
+                <p><strong>Filename:</strong> ${d.data.filename}</p>
+                <p><strong>Filepath:</strong> ${d.data.filepath}</p>
+            `;
+        } else if (d.group === "topic") {
+            detailsHTML = `
+                <p><strong>Topic Name:</strong> ${d.data.topic_name}</p>
+                <p><strong>Topic Description:</strong> ${d.data.topic_description}</p>
+            `;
+        } else if (d.group === "stakeholder") {
+            detailsHTML = `
+                <p><strong>Stakeholder Name:</strong> ${d.data.stakeholder_name}</p>
+                <p><strong>Stakeholder Type:</strong> ${d.data.stakeholder_type}</p>
+            `;
+        }else if (d.group === "entity") {
+          detailsHTML = `
+            <p><strong>Entity Name:</strong> ${d.data.entity_name}</p>
+            <p><strong>Entity Description:</strong> ${d.data.entity_description}</p>
+            `;
+        }
+        tooltip.html(detailsHTML)
+           .style("left", (event.pageX + 10) + "px")
+           .style("top", (event.pageY - 30) + "px");
+    }
+   function mouseoutNode(event, d) {
+       tooltip.transition()
+           .duration(300)
+           .style("opacity", 0);
+       node.classed("node-active", false);
+        link.classed("link-active", false);
+    }
+   function clickNode(event, d) {
+            if (event.ctrlKey) {
+                // Control + click for multi-select
+                const index = selectedNodes.indexOf(d);
+                if (index === -1) {
+                  selectedNodes.push(d)
+                  d3.select(event.currentTarget).select('circle').classed("node-selected", true);
+                }
+                else {
+                   selectedNodes.splice(index, 1);
+                    d3.select(event.currentTarget).select('circle').classed("node-selected", false);
+               }
+             } else {
+               // Single click to clear selection and select
+                 const index = selectedNodes.indexOf(d)
+                if (index !== -1) {
+                     selectedNodes.splice(index, 1);
+                     d3.select(event.currentTarget).select('circle').classed("node-selected", false);
+                     return
+                 }
+                 node.selectAll('circle').classed("node-selected", false);
+              selectedNodes = [];
+              selectedNodes.push(d);
+             d3.select(event.currentTarget).select('circle').classed("node-selected", true);
+            }
+        event.stopPropagation()
+    }
+
+     function clearSelection(){
+       node.selectAll('circle').classed("node-selected", false);
+       selectedNodes = [];
+      contextMenu.style("display", "none"); // hide context menu
+     }
+    function rightClickNode(event, d) {
+        event.preventDefault();
+         contextMenu
+            .style("left", `${event.pageX}px`)
+           .style("top", `${event.pageY}px`)
+             .style("display", "block");
+
+         d3.select("#link-nodes-option")
+             .on("click", () => {
+                 linkNodes();
+                 contextMenu.style("display", "none");
+            });
+
+    }
+
+
+    function linkNodes() {
+      if (selectedNodes.length > 1) {
+          for(let i = 0; i < selectedNodes.length - 1; i++) {
+              let source = selectedNodes[i];
+               let target = selectedNodes[i+1];
+                const newEdge = {source: source, target: target};
+               const edgeId = `${source.id}-${target.id}`;
+              const edgeId2 = `${target.id}-${source.id}`
+              const edgeExists = edges.some(e => `${e.source.id}-${e.target.id}` === edgeId || `${e.source.id}-${e.target.id}` === edgeId2)
+            if (!edgeExists) {
+                edges.push(newEdge)
+             }
+          }
+      }
+
+        link = svg.select(".links")
+            .selectAll("line")
+            .data(edges, d => `${d.source.id}-${d.target.id}`)
+          .join("line")
+            .attr("class", "link")
+            .attr("stroke-width", 1);
+
+
+         simulation.force("link", d3.forceLink(edges).id(d => d.id).strength(linkStrengthInput.property("value")).distance(linkDistanceInput.property("value")))
+            .alpha(1).restart()
+
+    }
+
+
+    modalCloseButton.onclick = function () {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+         contextMenu.style("display", "none");
+    };
+    nodeTypeFilter.on("change", () => {
+       const selectedNodeType = nodeTypeFilter.property("value");
+        const filteredNodes = selectedNodeType === "all" ? nodes : nodes.filter(node => node.group === selectedNodeType);
+        node.data(filteredNodes, d => d.id)
+            .join(
+              enter => enter,
+              update => update,
+              exit => exit.remove()
+            )
+          link.data(edges.filter(edge => filteredNodes.some(n => n.id === edge.source.id) && filteredNodes.some(n => n.id === edge.target.id)), d => d.id)
+           .join(
+              enter => enter,
+              update => update,
+              exit => exit.remove()
+          )
+         simulation.nodes(filteredNodes).alpha(1).restart();
+    });
+
+    htmx.onLoad(() => {
+        fetch('/graph_data')
+            .then(response => response.json())
+            .then(data => {
+                createGraph(data);
+            });
+    });
+</script>
