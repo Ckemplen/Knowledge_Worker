@@ -30,6 +30,11 @@ class CreateDocument(Command):
 class ProcessDocument(Command):
     document_id: int
 
+@dataclass 
+class UpdateDocumentSummary(Command):
+    id: int
+    summary: str
+
 
 @dataclass
 class ConsolidateCanonicalEntities(Command):
@@ -43,3 +48,17 @@ class ConsolidateCanonicalEntities(Command):
 class AddStakeholder(Command):
     stakeholder_name: str
     stakeholder_type: str
+
+
+@dataclass
+class UpdateStakeholder(Command):
+    id: int
+    stakeholder_name: str
+    stakeholder_type: str
+
+
+@dataclass
+class UpdateEntity(Command):
+    id: int
+    entity_name: str
+    entity_description: str

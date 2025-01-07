@@ -1,0 +1,19 @@
+<tr class="govuk-table__row" id="document-{{ document.id }}"  hx-target="this" hx-swap="outerHTML">
+
+    <td class="govuk-table__cell">
+        <a href="{{ url_for('document_details', document_id=document.id) }}" class="govuk-link">{{ document.filename }}</a>
+        <p class="govuk-body-small"><i>{{document.last_modified_by}}, {{document.last_modified_at}}</i></p>
+        <form hx-put="/documents/{{document.id}}">
+            <label class="govuk-label">Document summary</label>
+            <textarea class="govuk-textarea" id="summary" name="summary" rows="5">{{document.summary}}</textarea>
+            <br>
+            <br>
+            <button type="submit" class="govuk-button">Submit</button>
+            <button hx-get="/documents/{{ document.id }}" class="govuk-button govuk-button--secondary">
+                Cancel
+            </button>
+        </form>
+        
+    </td>
+
+</tr>

@@ -5,13 +5,13 @@
 
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
-                <th scope="col" class="govuk-table__header">Entity Name</th>
+                <th scope="col" class="govuk-table__header">Entity</th>
                 <th scope="col" class="govuk-table__header"></th>
-                <th scope="col" class="govuk-table__header"></th>
+                <th scope="col" class="govuk-table__header">Links</th>
             </tr>
         </thead>
 
-        <tbody class="govuk-table__body">
+        <tbody class="govuk-table__body" id="entities">
             {% if entities %}
             
             {% for entity in entities %}

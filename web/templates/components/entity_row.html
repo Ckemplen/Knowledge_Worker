@@ -1,4 +1,4 @@
-<tr class="govuk-table__row" id="entity-{{ entity.id }}">
+<tr class="govuk-table__row" id="entity-{{ entity.id }}" hx-target="this" hx-swap="outerHTML">
 
     <td class="govuk-table__cell">
         <a href="" class="govuk-link">{{ entity.entity_name }}</a>
@@ -6,11 +6,33 @@
     </td>
 
     <td class="govuk-table__cell">
-        <button hx-delete="/entities/{{ entity.id }}" hx-target="#entity-{{ entity.id }}" hx-swap="outerHTML" class="govuk-button govuk-button--secondary">Delete</button>
+        <button hx-get="/entities/{{ entity.id }}/edit" class="govuk-button govuk-button--secondary">Edit</button>
+        <br>
+        <button hx-delete="/entities/{{ entity.id }}" hx-target="#entities-tab" hx-swap="outerHTML"
+            class="govuk-button govuk-button--warning">Delete</button>
     </td>
 
     <td class="govuk-table__cell">
-        <button hx-get="/entities/{{ entity.id }}/edit" hx-target="#entity-{{ entity.id }}" hx-swap="outerHTML" class="govuk-button govuk-button--secondary">Edit</button>
+
+        {% if entity.documents %}
+        <details class="govuk-details">
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text">
+                    Documents
+                </span>
+            </summary>
+            <div class="govuk-details__text">
+
+                <ul class="govuk-list govuk-list--bullet"
+                    style="max-height: 150px; overflow-y: auto; overflow-x: hidden; white-space: normal;">
+                    {% for document in entity.documents %}
+                    <li>{{ document.filename }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </details>
+        {% endif %}
+
     </td>
 
 </tr>

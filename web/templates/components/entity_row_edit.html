@@ -1,0 +1,21 @@
+<tr class="govuk-table__row" id="entity-{{ entity.id }}" hx-target="this" hx-swap="outerHTML">
+    <td class="govuk-table__cell">
+        <form hx-put="/entities/{{entity.id}}">
+            <label class="govuk-label">Entity name</label>
+            <input class="govuk-input" type="text" name="entity_name" value="{{entity.entity_name}}">
+            <br>
+            <br>
+            <label class="govuk-label">Entity description</label>
+            <textarea class="govuk-textarea" id="entity_description" name="entity_description" rows="5">{{entity.entity_description}}</textarea>
+            <br>
+            <br>
+            <button type="submit" class="govuk-button">Submit</button>
+            <button hx-get="/entities/{{ entity.id }}" class="govuk-button govuk-button--secondary">
+                Cancel
+            </button>
+        </form>
+    </td>
+    <td class="govuk-table__cell">
+
+    </td>
+</tr>

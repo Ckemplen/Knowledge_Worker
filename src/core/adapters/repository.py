@@ -143,12 +143,29 @@ class SqlAlchemyDocumentRepository(AbstractRepository):
 
     def _list(self) -> List[model.Document]:
         document_objs = self.session.query(orm.DocumentORM).all()
+        entity_objs = self.session.query(orm.EntityORM).all()
+        links = self.session.query(orm.DocumentEntityORM).all()
+
+        # Create a dictionary to map entity IDs to their Pydantic models
+        entity_dict = {e.id: model.Entity.model_validate(e.to_dict()) for e in entity_objs}
+
         documents = []
         for d in document_objs:
             document_dict = d.to_dict()
             document_dict.pop("next_versions", None)
             document_dict.pop("previous_versions", None)
-            documents.append(model.Document.model_validate(document_dict))
+            pydantic_document = model.Document.model_validate(document_dict)
+            # pydantic_document.entities = []
+
+            # Add entities to the document's entities property
+            for link in links:
+                if link.document_id == d.id:
+                    entity = entity_dict.get(link.entity_id)
+                    if entity:
+                        pydantic_document.entities.append(entity)
+
+            documents.append(pydantic_document)
+
         return documents
 
 
@@ -282,7 +299,27 @@ class SqlAlchemyEntitiesRepository(AbstractRepository):
 
     def _list(self):
         entity_objs = self.session.query(orm.EntityORM).all()
-        return [model.Entity.model_validate(r_e.to_dict()) for r_e in entity_objs]
+        document_objs = self.session.query(orm.DocumentORM).all()
+        links = self.session.query(orm.DocumentEntityORM).all()
+
+        pydantic_entities = [model.Entity.model_validate(e.to_dict()) for e in entity_objs]
+
+        document_dict = {}
+        for d in document_objs:
+            doc = d.to_dict()
+            doc.pop("next_versions", None)
+            doc.pop("previous_versions", None)
+            document_dict[d.id] = model.Document.model_validate(doc)
+
+        entity_dict = {e.id: e for e in pydantic_entities}
+
+        for link in links:
+            entity = entity_dict.get(link.entity_id)
+            document = document_dict.get(link.document_id)
+            if entity and document:
+                entity.documents.append(document)
+
+        return pydantic_entities
 
     def _update(self, updated_obj: model.Entity, fields: List[str]):
         entity_obj: ORM_OBJECT = (

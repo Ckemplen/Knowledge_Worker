@@ -1,0 +1,21 @@
+<tr class="govuk-table__row" id="stakeholder-{{ stakeholder.id }}" hx-target="this" hx-swap="outerHTML">
+    <td class="govuk-table__cell">
+        <form hx-put="/stakeholders/{{stakeholder.id}}">
+            <label class="govuk-label">Stakeholder name</label>
+            <input class="govuk-input" type="text" name="stakeholder_name" value="{{stakeholder.stakeholder_name}}">
+            <br>
+            <br>
+            <label class="govuk-label">Stakeholder type</label>
+            <input class="govuk-input" type="text" name="stakeholder_type" value="{{stakeholder.stakeholder_type}}">
+            <br>
+            <br>
+            <button type="submit" class="govuk-button">Submit</button>
+            <button hx-get="/stakeholders/{{ stakeholder.id }}" class="govuk-button govuk-button--secondary">
+                Cancel
+            </button>
+        </form>
+    </td>
+    <td class="govuk-table__cell">
+
+    </td>
+</tr>

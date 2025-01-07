@@ -1,6 +1,12 @@
 import core.domain.commands as commands
 import core.domain.events as events
-from core.domain.model import Document, Entity, EntityRawEntity, DocumentEntity
+from core.domain.model import (
+    Document,
+    Entity,
+    EntityRawEntity,
+    DocumentEntity,
+    Stakeholder,
+)
 import core.domain.error_messages
 import core.service_layer.unit_of_work as uow
 from core.adapters.llm_connectors import (
@@ -9,6 +15,7 @@ from core.adapters.llm_connectors import (
     AbstractConnector,
 )
 import json
+from dataclasses import asdict
 
 
 def add_new_document(
@@ -321,6 +328,55 @@ def add_stakeholder(cmd: commands.AddStakeholder, uow: uow.AbstractUnitOfWork):
             uow.commit()
 
 
+def update_stakeholder(cmd: commands.UpdateStakeholder, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            updated_stakeholder = Stakeholder(**asdict(cmd))
+            uow.stakeholders.update(
+                updated_obj=updated_stakeholder,
+                fields=["stakeholder_name", "stakeholder_type"],
+            )
+        except Exception as e:
+            print("Error occured updating stakeholder.")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
+
+def update_entity(cmd: commands.UpdateEntity, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            updated_entity = Entity(**asdict(cmd))
+            uow.entities.update(
+                updated_obj=update_entity,
+                fields=['entity_name', 'entity_description']
+            )
+        except Exception as e:
+            print("Error occured updating stakeholder.")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
+def update_document_summary(cmd: commands.UpdateDocumentSummary, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            current_doc = uow.documents.get(reference=id)
+            update_dict = current_doc.to_dict()
+            update_dict['summary'] = cmd.summary
+            updated_doc = Document(**update_dict)
+            uow.entities.update(
+                updated_obj=updated_doc,
+                fields=['summary']
+            )
+        except Exception as e:
+            print("Error occured updating document.")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
 EVENT_HANDLERS = {
     events.DocumentCreated: [
         ("add_document_comments", add_document_comments),
@@ -339,6 +395,9 @@ EVENT_HANDLERS = {
 
 COMMAND_HANDLERS = {
     commands.AddStakeholder: ("add_stakeholder", add_stakeholder),
+    commands.UpdateStakeholder: ("update_stakeholder", update_stakeholder),
+    commands.UpdateEntity: ("update_entity", update_entity),
+    commands.UpdateDocumentSummary: ("update_document_summary", update_document_summary),
     commands.CreateDocument: ("add_new_document", add_new_document),
     commands.ConsolidateCanonicalEntities: (
         "consolidate_canonical_entities",
