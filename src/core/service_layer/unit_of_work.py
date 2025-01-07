@@ -1,15 +1,17 @@
 import core.adapters.repository as repository
 import abc
-import core.config as config
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-DEFAULT_SESSION_FACTORY = sessionmaker( 
+DEFAULT_SESSION_FACTORY = sessionmaker(
     bind=create_engine(
-        f"sqlite:///{config.DATABASE_PATH}", # echo=config.DB_ECHO
+        "sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite",  # echo=config.DB_ECHO
     )
+    # bind=create_engine(
+    #     f"sqlite:///{config.DATABASE_PATH}", # echo=config.DB_ECHO
+    # )
 )
 
 
@@ -32,7 +34,14 @@ class AbstractUnitOfWork(abc.ABC):
         self._commit()
 
     def collect_new_events(self):
-        for repo in [self.documents, self.comments, self.raw_topics, self.raw_entities, self.topics, self.entities]:
+        for repo in [
+            self.documents,
+            self.comments,
+            self.raw_topics,
+            self.raw_entities,
+            self.topics,
+            self.entities,
+        ]:
             for object in repo.seen:
                 while object.events:
                     yield object.events.pop(0)
@@ -44,7 +53,7 @@ class AbstractUnitOfWork(abc.ABC):
     @abc.abstractmethod
     def rollback(self):
         raise NotImplementedError
-    
+
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):
@@ -52,8 +61,8 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.session_factory = session_factory
 
     def __enter__(self):
-        self.session = self.session_factory()  
-        self.documents = repository.SqlAlchemyDocumentRepository(self.session) 
+        self.session = self.session_factory()
+        self.documents = repository.SqlAlchemyDocumentRepository(self.session)
         self.comments = repository.SqlAlchemyCommentRepository(self.session)
         self.raw_topics = repository.SqlAlchemyRawTopicsRepository(self.session)
         self.raw_entities = repository.SqlAlchemyRawEntitiesRepository(self.session)
@@ -77,13 +86,12 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
 
 class FakeUnitOfWork(AbstractUnitOfWork):
-
     def __init__(self):
         super().__init__()  # Initialize the base class
         self.committed = False
 
     def __enter__(self):
-        self.documents = repository.FakeDocumentRepository(documents=[]) 
+        self.documents = repository.FakeDocumentRepository(documents=[])
         self.comments = repository.FakeCommentRepository(comments=[])
         self.raw_topics = repository.FakeRawTopicsRepository(raw_topics=[])
         self.raw_entities = repository.FakeRawEntitiesRepository(raw_entities=[])

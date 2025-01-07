@@ -16,22 +16,22 @@ class FakeDocumentsRepository(repository.AbstractRepository):
 
     def _add(self, document):
         return self.add(document)
-    
+
     def _get(self, reference):
         return self.get(reference)
 
     def add(self, cmd):
         document = asdict(cmd)
-        doc_comments = document.get('doc_comments')
-        del document['doc_comments']
-        doc = model.Document(**document, id=len(self._documents)+1, summary="")
+        doc_comments = document.get("doc_comments")
+        del document["doc_comments"]
+        doc = model.Document(**document, id=len(self._documents) + 1, summary="")
         doc.compose_DocumentCreated_event(doc_comments)
         self._documents.add(doc)
         return doc
 
     def get(self, reference):
         return next((d for d in self._documents if d.id == reference), None)
-    
+
     def _list(self):
         return self._documents
 
@@ -41,6 +41,7 @@ class FakeDocumentsRepository(repository.AbstractRepository):
             None,
         )
 
+
 class FakeCommentsRepository(repository.AbstractRepository):
     def __init__(self, comments):
         super().__init__()
@@ -48,19 +49,20 @@ class FakeCommentsRepository(repository.AbstractRepository):
 
     def _add(self, comment):
         return self.add(comment)
-    
+
     def _get(self, reference):
         return self.get(reference)
 
     def add(self, comment):
-        comment = model.Comment(**comment, id=len(self._comments)+1)
+        comment = model.Comment(**comment, id=len(self._comments) + 1)
         self._comments.add(comment)
 
     def get(self, reference):
         return next((c for c in self._comments if c.id == reference), None)
-    
+
     def _list(self):
         return self._comments
+
 
 class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
     def __init__(self):
@@ -78,7 +80,6 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
         pass
 
 
-
 def bootstrap_test_app():
     return bootstrap.bootstrap(
         uow=FakeUnitOfWork(),
@@ -90,55 +91,62 @@ def bootstrap_test_app():
 class TestAddDocument:
     def test_for_new_document(self):
         bus = bootstrap_test_app()
-        bus.handle(commands.CreateDocument(
-            filepath="fake/file/path",
-            filename='fake/file/path.docx',
-            text='Example text',
-            created_by='CKEMPLEN',
-            last_modified_by='CKEMPLEN',
-            last_modified_at=datetime.now(),
-            created_at=datetime.now(),
-            processed_at=datetime.now(),
-        ))
+        bus.handle(
+            commands.CreateDocument(
+                filepath="fake/file/path",
+                filename="fake/file/path.docx",
+                text="Example text",
+                created_by="CKEMPLEN",
+                last_modified_by="CKEMPLEN",
+                last_modified_at=datetime.now(),
+                created_at=datetime.now(),
+                processed_at=datetime.now(),
+            )
+        )
         assert bus.uow.documents.get(reference=1) is not None
         assert bus.uow.committed
 
     def test_for_existing_document(self):
         bus = bootstrap_test_app()
-        bus.handle(commands.CreateDocument(
-            filepath="fake/file/path",
-            filename='fake/file/path.docx',
-            text='Example text',
-            created_by='CKEMPLEN',
-            last_modified_by='CKEMPLEN',
-            last_modified_at=datetime.now(),
-            created_at=datetime.now(),
-            processed_at=datetime.now(),
-        ))
-        bus.handle(commands.CreateDocument(
-            filepath="fake/file/path",
-            filename='fake/file/path.docx',
-            text='Example text',
-            created_by='CKEMPLEN',
-            last_modified_by='CKEMPLEN',
-            last_modified_at=datetime.now(),
-            created_at=datetime.now(),
-            processed_at=datetime.now(),
-        ))
+        bus.handle(
+            commands.CreateDocument(
+                filepath="fake/file/path",
+                filename="fake/file/path.docx",
+                text="Example text",
+                created_by="CKEMPLEN",
+                last_modified_by="CKEMPLEN",
+                last_modified_at=datetime.now(),
+                created_at=datetime.now(),
+                processed_at=datetime.now(),
+            )
+        )
+        bus.handle(
+            commands.CreateDocument(
+                filepath="fake/file/path",
+                filename="fake/file/path.docx",
+                text="Example text",
+                created_by="CKEMPLEN",
+                last_modified_by="CKEMPLEN",
+                last_modified_at=datetime.now(),
+                created_at=datetime.now(),
+                processed_at=datetime.now(),
+            )
+        )
         assert bus.uow.documents.get(reference=2).previous_version_id == 1
         assert bus.uow.documents.get(reference=2).version == 2
 
     def test_comments_added(self):
-        doc_comments=[
-                    {'reference_text':"reference text 1", "author":"author name 1", "comment_date": "2024-12-31T14:24:01Z", "comment_text":"comment text 1", "document_id": 1},
-
-            ]
+        doc_comments = [
+            {
+                "reference_text": "reference text 1",
+                "author": "author name 1",
+                "comment_date": "2024-12-31T14:24:01Z",
+                "comment_text": "comment text 1",
+                "document_id": 1,
+            },
+        ]
         bus = bootstrap_test_app()
 
-        bus.handle(events.DocumentCreated(
-            document_id=1,
-            comments=doc_comments
-        ))
+        bus.handle(events.DocumentCreated(document_id=1, comments=doc_comments))
 
-        assert bus.uow.comments.get(reference=1).author == 'author name 1'
-
+        assert bus.uow.comments.get(reference=1).author == "author name 1"

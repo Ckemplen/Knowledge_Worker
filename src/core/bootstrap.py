@@ -9,13 +9,12 @@ def bootstrap(
     document_analysis_connector: llm_connectors.DocumentAnalysisConnector,
     canonical_entity_consolidation_connector: llm_connectors.CanonicalEntityConsolidationConnector,
 ) -> messagebus.MessageBus:
-        
     dependencies = {
-        "uow": uow, 
-        "document_analysis_connector": document_analysis_connector, 
-        "canonical_entity_consolidation_connector": canonical_entity_consolidation_connector
-        }
-    
+        "uow": uow,
+        "document_analysis_connector": document_analysis_connector,
+        "canonical_entity_consolidation_connector": canonical_entity_consolidation_connector,
+    }
+
     injected_event_handlers = {
         event_type: [
             (handler_name, inject_dependencies(handler, dependencies))
@@ -23,7 +22,7 @@ def bootstrap(
         ]
         for event_type, event_handlers in handlers.EVENT_HANDLERS.items()
     }
-    
+
     injected_command_handlers = {
         command_type: (handler_name, inject_dependencies(handler, dependencies))
         for command_type, (handler_name, handler) in handlers.COMMAND_HANDLERS.items()
@@ -35,12 +34,10 @@ def bootstrap(
         command_handlers=injected_command_handlers,
     )
 
+
 def inject_dependencies(handler, dependencies):
     params = inspect.signature(handler).parameters
     deps = {
-        name: dependency
-        for name, dependency in dependencies.items()
-        if name in params
+        name: dependency for name, dependency in dependencies.items() if name in params
     }
     return lambda message: handler(message, **deps)
-

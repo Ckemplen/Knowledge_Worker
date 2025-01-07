@@ -4,8 +4,10 @@ from typing import Optional, List, NamedTuple
 from . import events
 from dataclasses import dataclass
 
+
 class DomainDataclass:
     pass
+
 
 class Document(BaseModel):
     id: int
@@ -24,27 +26,39 @@ class Document(BaseModel):
     summary: Optional[str]
     version_comment: Optional[str]
     revision: Optional[int] = 0
-    comments: Optional[List['Comment']] = Field(default_factory=list, exclude=True)
-    previous_versions: Optional[List['Document']] = Field(default_factory=list, exclude=True)
-    next_versions: Optional[List['Document']] = Field(default_factory=list, exclude=True)
-    raw_topics: Optional[List['RawTopic']] = []
-    document_topics: Optional[List['DocumentTopic']] = []
-    raw_entities: Optional[List['RawEntity']] = []
-    document_entities: Optional[List['DocumentEntity']] = []
+    comments: Optional[List["Comment"]] = Field(default_factory=list, exclude=True)
+    previous_versions: Optional[List["Document"]] = Field(
+        default_factory=list, exclude=True
+    )
+    next_versions: Optional[List["Document"]] = Field(
+        default_factory=list, exclude=True
+    )
+    raw_topics: Optional[List["RawTopic"]] = []
+    document_topics: Optional[List["DocumentTopic"]] = []
+    raw_entities: Optional[List["RawEntity"]] = []
+    document_entities: Optional[List["DocumentEntity"]] = []
     events: Optional[List] = []
 
     def compose_DocumentCreated_event(self, doc_comments) -> None:
         if doc_comments is not None:
             docx_comments = [DocxComment(*c) for c in doc_comments]
-            self.events.append(events.DocumentCreated(
-            document_id=self.id, 
-            comments=[{
-                'document_id': self.id,
-                'reference_text': c.reference_text,
-                'author': c.author,
-                'comment_date': datetime.strptime(c.date, '%Y-%m-%dT%H:%M:%SZ'),
-                'comment_text': c.comment_text} 
-                      for c in docx_comments]))
+            self.events.append(
+                events.DocumentCreated(
+                    document_id=self.id,
+                    comments=[
+                        {
+                            "document_id": self.id,
+                            "reference_text": c.reference_text,
+                            "author": c.author,
+                            "comment_date": datetime.strptime(
+                                c.date, "%Y-%m-%dT%H:%M:%SZ"
+                            ),
+                            "comment_text": c.comment_text,
+                        }
+                        for c in docx_comments
+                    ],
+                )
+            )
         return None
 
     def __hash__(self):
@@ -54,8 +68,10 @@ class Document(BaseModel):
         from_attributes = True
         arbitrary_types_allowed = True
         json_encoders = {
-            'Document': lambda v: v.dict(exclude={'next_versions', 'previous_versions', 'comments'}),
-            datetime: lambda v: v.isoformat() 
+            "Document": lambda v: v.dict(
+                exclude={"next_versions", "previous_versions", "comments"}
+            ),
+            datetime: lambda v: v.isoformat(),
         }
 
 
@@ -74,9 +90,8 @@ class Comment(BaseModel):
 
     class Config:
         from_attributes = True
-        json_encoders = {
-            datetime: lambda v: v.isoformat() 
-        }
+        json_encoders = {datetime: lambda v: v.isoformat()}
+
 
 class RawTopic(BaseModel):
     id: int
@@ -93,20 +108,21 @@ class RawTopic(BaseModel):
     class Config:
         from_attributes = True
 
+
 class Topic(BaseModel):
     id: int
     topic_name: str
     topic_description: str
-    document_topics: Optional[List['DocumentTopic']] = []
-    raw_topics: Optional[List['TopicRawTopic']] = []
+    document_topics: Optional[List["DocumentTopic"]] = []
+    raw_topics: Optional[List["TopicRawTopic"]] = []
     events: Optional[List] = []
 
-    
     def __hash__(self):
         return hash((self.id, self.topic_description))
 
     class Config:
         from_attributes = True
+
 
 class RawEntity(BaseModel):
     id: int
@@ -123,6 +139,7 @@ class RawEntity(BaseModel):
     class Config:
         from_attributes = True
 
+
 class Entity(BaseModel):
     id: int
     entity_name: str
@@ -131,12 +148,12 @@ class Entity(BaseModel):
     # raw_entities: Optional[List['EntityRawEntity']] = []
     events: Optional[List] = []
 
-    
     def __hash__(self):
         return hash((self.id, self.entity_name, self.entity_description))
 
     class Config:
         from_attributes = True
+
 
 class Stakeholder(BaseModel):
     id: int
@@ -145,9 +162,10 @@ class Stakeholder(BaseModel):
 
     def __hash__(self):
         return hash((self.id, self.stakeholder_name, self.stakeholder_type))
-    
+
     class Config:
         from_attributes = True
+
 
 @dataclass
 class DocumentTopic(DomainDataclass):
@@ -156,12 +174,12 @@ class DocumentTopic(DomainDataclass):
     # document: Optional['Document'] = None
     # topic: Optional['Topic'] = None
 
-    
     def __hash__(self):
         return hash((self.topic_id, self.document_id))
 
     # class Config:
     #     from_attributes = True
+
 
 @dataclass
 class TopicRawTopic(DomainDataclass):
@@ -169,12 +187,13 @@ class TopicRawTopic(DomainDataclass):
     raw_topic_id: int
     # topic: Optional['Topic'] = None
     # raw_topic: Optional['RawTopic'] = None
-    
+
     def __hash__(self):
         return hash((self.topic_id, self.raw_topic_id))
 
     # class Config:
     #     from_attributes = True
+
 
 @dataclass
 class DocumentEntity(DomainDataclass):
@@ -183,12 +202,12 @@ class DocumentEntity(DomainDataclass):
     # document: Optional['Document'] = None
     # entity: Optional['Entity'] = None
 
-    
     def __hash__(self):
         return hash((self.entity_id, self.document_id))
 
     # class Config:
     #     from_attributes = True
+
 
 @dataclass
 class EntityRawEntity(DomainDataclass):
@@ -197,12 +216,12 @@ class EntityRawEntity(DomainDataclass):
     # entity: Optional['Entity'] = None
     # raw_entity: Optional['RawEntity'] = None
 
-    
     def __hash__(self):
         return hash((self.entity_id, self.raw_entity_id))
 
     # class Config:
     #     from_attributes = True
+
 
 class DocxComment(NamedTuple):
     reference_text: str

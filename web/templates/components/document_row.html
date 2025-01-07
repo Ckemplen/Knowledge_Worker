@@ -2,6 +2,8 @@
 
     <td class="govuk-table__cell">
         <a href="{{ url_for('document_details', document_id=document.id) }}" class="govuk-link">{{ document.filename }}</a>
+        <p class="govuk-body">{{document.summary}}</p>
+        <p class="govuk-body-small"><i>{{document.last_modified_by}}, {{document.last_modified_at}}</i></p>
     </td>
 
     <td class="govuk-table__cell">

@@ -4,7 +4,10 @@ from docx2python import docx2python
 
 from core.database import create_database
 from core.service_layer.unit_of_work import SqlAlchemyUnitOfWork
-from core.adapters.llm_connectors import DocumentAnalysisConnector, CanonicalEntityConsolidationConnector
+from core.adapters.llm_connectors import (
+    DocumentAnalysisConnector,
+    CanonicalEntityConsolidationConnector,
+)
 import core.bootstrap
 
 import core.domain.commands
@@ -14,7 +17,6 @@ from core.config import DATABASE_PATH
 
 
 def process_file_list(file_list_path):
-
     try:
         with open(file_list_path, "r") as f:
             file_paths = [line.strip().strip('"') for line in f]
@@ -39,7 +41,6 @@ def process_file_list(file_list_path):
 
 
 def create_document_from_docx(file_path):
-
     doc = docx2python(file_path)
     html_text = docx2python(file_path, html=True).text
 
@@ -51,12 +52,16 @@ def create_document_from_docx(file_path):
         filetype=".docx",
         text=doc.text,
         html_text=html_text,
-        last_modified_at=datetime.datetime.strptime(doc.properties.get('modified'), '%Y-%m-%dT%H:%M:%SZ'),
+        last_modified_at=datetime.datetime.strptime(
+            doc.properties.get("modified"), "%Y-%m-%dT%H:%M:%SZ"
+        ),
         processed_at=datetime.datetime.now(),
-        created_at=datetime.datetime.strptime(doc.properties.get('created'), '%Y-%m-%dT%H:%M:%SZ'),
-        created_by=doc.properties.get('creator', 'CKEMPLEN'),
-        last_modified_by=doc.properties.get('lastModifiedBy', 'CKEMPLEN'),
-        revision=doc.properties.get('revision', 0),
+        created_at=datetime.datetime.strptime(
+            doc.properties.get("created"), "%Y-%m-%dT%H:%M:%SZ"
+        ),
+        created_by=doc.properties.get("creator", "CKEMPLEN"),
+        last_modified_by=doc.properties.get("lastModifiedBy", "CKEMPLEN"),
+        revision=doc.properties.get("revision", 0),
         doc_comments=doc.comments,
     )
 
@@ -64,20 +69,20 @@ def create_document_from_docx(file_path):
 
 
 if __name__ == "__main__":
-    
     bus = core.bootstrap.bootstrap(
-        uow=SqlAlchemyUnitOfWork(), 
+        uow=SqlAlchemyUnitOfWork(),
         document_analysis_connector=DocumentAnalysisConnector(),
-        canonical_entity_consolidation_connector=CanonicalEntityConsolidationConnector()
-        )
+        canonical_entity_consolidation_connector=CanonicalEntityConsolidationConnector(),
+    )
 
     create_database(DATABASE_PATH)
 
-   #process_file_list(FILE_LIST)
+    # process_file_list(FILE_LIST)
 
-    bus.handle(message=core.domain.commands.ConsolidateCanonicalEntities(
-        entity_ids=None,
-        raw_entity_ids=None,
+    bus.handle(
+        message=core.domain.commands.ConsolidateCanonicalEntities(
+            entity_ids=None,
+            raw_entity_ids=None,
         )
     )
 
@@ -87,4 +92,3 @@ if __name__ == "__main__":
 #                 70, 121
 #                 )
 #             )
-

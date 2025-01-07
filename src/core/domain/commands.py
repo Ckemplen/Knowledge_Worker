@@ -2,8 +2,10 @@ from dataclasses import dataclass
 from typing import Optional, List, Tuple, Union
 from datetime import datetime
 
+
 class Command:
     pass
+
 
 @dataclass
 class CreateDocument(Command):
@@ -23,18 +25,21 @@ class CreateDocument(Command):
     version: Optional[int] = 1
     previous_version_id: Optional[int] = None
 
+
 @dataclass
 class ProcessDocument(Command):
     document_id: int
 
-@dataclass    
+
+@dataclass
 class ConsolidateCanonicalEntities(Command):
     """Pass in list of specific ids, or leave as None to review all."""
+
     entity_ids: Union[List[int], None]
     raw_entity_ids: Union[List[int], None]
+
 
 @dataclass
 class AddStakeholder(Command):
     stakeholder_name: str
     stakeholder_type: str
-    

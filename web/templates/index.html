@@ -28,17 +28,25 @@
       </div>
       <div class="govuk-header__content">
         <a href="#" class="govuk-header__link govuk-header__service-name">
-          Policy Profession  -  Knowledge Work Assistant
+          Experimental Knowledge Map
         </a>
       </div>
     </div>
   </header>
   <main class="govuk-main-wrapper">
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        <div class="govuk-heading-l">Domain Knowledge Mapper</div>
+      </div>
+    </div>
+    
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-full">
         {% include "components/tab_box.html" %}
       </div>
     </div>
+
   </main>
   <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
   <script type="module" src="{{ url_for('static', path='/govuk-frontend-5.7.1.min.js') }}"></script>

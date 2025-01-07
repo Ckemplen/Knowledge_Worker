@@ -1,0 +1,16 @@
+<tr class="govuk-table__row" id="entity-{{ entity.id }}">
+
+    <td class="govuk-table__cell">
+        <a href="" class="govuk-link">{{ entity.entity_name }}</a>
+        <p class="govuk-body">{{entity.entity_description}}</p>
+    </td>
+
+    <td class="govuk-table__cell">
+        <button hx-delete="/entities/{{ entity.id }}" hx-target="#entity-{{ entity.id }}" hx-swap="outerHTML" class="govuk-button govuk-button--secondary">Delete</button>
+    </td>
+
+    <td class="govuk-table__cell">
+        <button hx-get="/entities/{{ entity.id }}/edit" hx-target="#entity-{{ entity.id }}" hx-swap="outerHTML" class="govuk-button govuk-button--secondary">Edit</button>
+    </td>
+
+</tr>
