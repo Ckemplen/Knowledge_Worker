@@ -1,524 +1,734 @@
 <style>
-    .node {
-        stroke: #fff;
-        stroke-width: 1.5px;
-        cursor: pointer;
-    }
 
-    .link {
-        stroke: #999;
-        stroke-opacity: 0.6;
-        stroke-width: 1;
-    }
-
-    #chart {
-        width: 100%;
-        height: 600px;
-        overflow: hidden;
-        border: 1px solid #ddd;
-        position: relative;
-    }
-
-    #chart svg {
+    /* Styles for the container holding the Three.js chart */
+    #chart-container {
+        width: 100%; /* Occupy 80% of the width */
+        height: 90vh;
         display: block;
+        overflow: hidden;
+        position: relative; /* Needed for positioning tooltips */
     }
 
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
+    /* Styles for the control panel */
+    #control-panel {
+        width: 100%; /* Occupy 20% of the width */
+        height: 90vh;
         padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        border-radius: 5px;
-        max-height: 80vh;
-        overflow-y: auto;
+        background-color: #e0e0e0;
+        overflow-y: auto; /* Allow scrolling if content overflows */
+        box-sizing: border-box; /* Include padding in width calculation */
     }
 
-    .close-modal {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
+    #control-panel label {
+        display: block;
+        margin-bottom: 5px;
     }
 
-    #filter-controls {
-        margin-bottom: 20px;
-    }
-
-    #config-controls {
-        margin-bottom: 20px;
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    #config-controls > div {
-        margin-right: 20px;
-        margin-bottom: 10px;
-    }
-
-    .node-group-document {
-        fill: #6baed6;
-    }
-
-    .node-group-topic {
-        fill: #d95f02;
-    }
-
-    .node-group-stakeholder {
-        fill: #2ca25f;
-    }
-
-    .node-group-entity {
-        fill: #e377c2;
-    }
-
-    .node-active {
-        stroke: #000;
-        stroke-width: 3px;
-    }
-
-    .link-active {
-        stroke: #000;
-        stroke-width: 3px;
-    }
-
-    .icon-text {
-        font-family: "Font Awesome 6 Free";
-        font-size: 24px;
-        text-anchor: middle;
-        dominant-baseline: central;
-    }
-
-    .label-text {
-        font-family: sans-serif;
-        font-size: 10px;
-        text-anchor: middle;
-        dominant-baseline: central;
-        pointer-events: none;
-        fill: #000;
-    }
-
-    .tooltip {
-        position: absolute;
-        text-align: left;
-        width: auto;
+    #control-panel input[type="number"],
+    #control-panel input[type="color"] {
+        width: calc(100% - 10px);
         padding: 8px;
-        font: 12px sans-serif;
-        background: #fff;
-        border: 1px solid #ddd;
-        pointer-events: none;
-        border-radius: 5px;
-        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-        opacity: 0;
-        transition: opacity 0.2s;
-        z-index: 10;
+        margin-bottom: 15px;
+        box-sizing: border-box;
     }
 
-    .tooltip p {
-        margin-bottom: 0.4em;
-    }
-
-    #center-button {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-    }
-
-    .node-selected {
-        stroke: #000;
-        stroke-width: 3px;
-        fill: #fff;
-        r: 15px;
-    }
-
-    #context-menu {
-        position: absolute;
-        background: white;
-        border: 1px solid #ddd;
-        padding: 5px;
-        display: none;
-         z-index: 11;
-    }
-     #context-menu > div {
-         padding: 5px;
+    #control-panel button {
+        padding: 10px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
         cursor: pointer;
-    }
-    #context-menu > div:hover {
-        background-color: #eee;
     }
 </style>
 
-<div id="filter-controls">
-    <label for="node-type-filter">Filter by Node Type:</label>
-    <select id="node-type-filter">
-        <option value="all">All</option>
-        <option value="document">Document</option>
-        <option value="topic">Topic</option>
-        <option value="stakeholder">Stakeholder</option>
-        <option value="entity">Entity</option>
-    </select>
-</div>
-    <div id="config-controls">
-        <div>
-            <label for="charge-strength" title="Controls the attractive or repulsive forces between nodes">Charge Strength:</label>
-            <input type="number" id="charge-strength" value="-200">
-        </div>
-        <div>
-            <label for="link-strength" title="Controls the strength of the links between nodes">Link Strength:</label>
-            <input type="number" id="link-strength" value="1">
-        </div>
-        <div>
-            <label for="link-distance" title="Controls the distance between connected nodes">Link Distance:</label>
-            <input type="number" id="link-distance" value="30">
-        </div>
-    </div>
-
-<div id="chart">
-     <button id="center-button" class="govuk-button govuk-button--secondary">Center</button>
-</div>
-
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal">×</span>
-        <h2 id="modal-title">Node Details</h2>
-        <div id="modal-info"></div>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-three-quarters">
+    <div id="chart-container">
     </div>
 </div>
 
- <div id="context-menu">
-        <div id="link-nodes-option">Link Nodes</div>
+<div class="govuk-grid-column-one-quarter">
+    <div id="control-panel">
+        <h2 class="govuk-heading">Graph Controls</h2>
+    
+        <label class="govuk-label" for="nodeBaseSize">Node Base Size:</label>
+        <input class="govuk-input" type="number" id="nodeBaseSize" value="15">
+    
+        <label class="govuk-label" for="nodeScaleFactorMin">Node Scale Min (Degree > 1):</label>
+        <input class="govuk-input" type="number" id="nodeScaleFactorMin" value="3" step="0.1">
+    
+        <label class="govuk-label" for="nodeScaleFactorMax">Node Scale Max (Degree > 1):</label>
+        <input class="govuk-input" type="number" id="nodeScaleFactorMax" value="1" step="0.1">
+    
+        <label class="govuk-label" for="nodeColorDocument">Document Node Color:</label>
+        <input class="govuk-input" type="color" id="nodeColorDocument" value="#12436D">
+    
+        <label class="govuk-label" for="nodeColorTopic">Topic Node Color:</label>
+        <input class="govuk-input" type="color" id="nodeColorTopic" value="#28A197">
+    
+        <label class="govuk-label" for="nodeColorEntity">Entity Node Color:</label>
+        <input class="govuk-input" type="color" id="nodeColorEntity" value="#801650">
+    
+        <label class="govuk-label" for="nodeColorStakeholder">Stakeholder Node Color:</label>
+        <input class="govuk-input" type="color" id="nodeColorStakeholder" value="#F46A25">
+    
+        <label class="govuk-label" for="edgeColor">Edge Color:</label>
+        <input class="govuk-input" type="color" id="edgeColor" value="#999999">
+    
+        <label class="govuk-label" for="edgeCurveOffset">Edge Curve Offset:</label>
+        <input class="govuk-input" type="number" id="edgeCurveOffset" value="100">
+    
+        <label class="govuk-label" for="tooltipFontSize">Tooltip Font Size:</label>
+        <input class="govuk-input" type="number" id="tooltipFontSize" value="16">
+    
+        <label class="govuk-label" for="tooltipMaxWidth">Tooltip Max Width:</label>
+        <input class="govuk-input" type="number" id="tooltipMaxWidth" value="250">
+    
+        <button id="updateGraphButton">Update Graph</button>
+    </div>
 </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
 <script>
+    // --- Editable Constants ---
+    let NODE_BASE_SIZE = 15;
+    let NODE_SCALE_FACTOR_MIN = 3;
+    let NODE_SCALE_FACTOR_MAX = 1;
+    let NODE_COLOR_DOCUMENT = 0x12436D;
+    let NODE_COLOR_TOPIC = 0x28A197;
+    let NODE_COLOR_ENTITY = 0x801650;
+    let NODE_COLOR_STAKEHOLDER = 0xF46A25;
+    let EDGE_COLOR = 0x999999;
+    let EDGE_CURVE_OFFSET = 100;
+    let TOOLTIP_FONT_SIZE = 16;
+    let TOOLTIP_MAX_WIDTH = 250;
+
+    // --- Initialization ---
+    console.log('Initializing Three.js scene...');
+
+    const chartContainer = document.getElementById('chart-container');
+    const controlPanel = document.getElementById('control-panel');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, chartContainer.clientWidth / chartContainer.clientHeight, 0.1, 2000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(chartContainer.clientWidth, chartContainer.clientHeight);
+    chartContainer.appendChild(renderer.domElement);
+    renderer.setClearColor(0xefefef, 1);
+    camera.position.set(0, 0, 700);
+    const orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+    orbitControls.enableDamping = true;
+    orbitControls.dampingFactor = 0.05;
+
+    // --- Lighting ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
+
+    // --- Data Structures ---
     let nodes = [];
     let edges = [];
-    let svg;
-    let simulation;
-    let link;
-    let node;
-    let selectedNodes = []; // Array to keep track of selected nodes
-     const chart = d3.select("#chart");
-    const width = chart.node().clientWidth;
-    const height = chart.node().clientHeight;
-    svg = chart.append("svg")
-        .attr("width", width)
-        .attr("height", height)
-         .on("click", clearSelection); // Clear selection when clicking on the svg background
 
-    const nodeTypeFilter = d3.select("#node-type-filter");
-    const modal = document.getElementById("modal");
-    const modalCloseButton = document.getElementsByClassName("close-modal")[0];
-    const contextMenu = d3.select("#context-menu");
+    // --- Raycasting and Intersection ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let INTERSECTED;
+    let CLICKED_OBJECT;
+    let isTooltipVisible = false; // Track if a tooltip is currently visible
 
+    // --- Tooltips ---
+    const nodeTooltips = {};
+    const edgeTooltips = {};
+    const tooltipGroup = new THREE.Group();
+    tooltipGroup.renderOrder = 2;
+    scene.add(tooltipGroup);
 
-    // Tooltip setup
-    const tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-     const centerButton = d3.select("#center-button").on("click", centerGraph);
+    // --- Raycaster Visualization (Debugging) ---
+    const raycasterGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)]);
+    const raycasterMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+    const raycasterLine = new THREE.Line(raycasterGeometry, raycasterMaterial);
+    scene.add(raycasterLine);
 
-     const chargeStrengthInput = d3.select("#charge-strength");
-    const linkStrengthInput = d3.select("#link-strength");
-    const linkDistanceInput = d3.select("#link-distance");
-
-    chargeStrengthInput.on("input", updateSimulation);
-    linkStrengthInput.on("input", updateSimulation);
-    linkDistanceInput.on("input", updateSimulation);
-
-
-  function updateSimulation() {
-     if (simulation) {
-           simulation
-              .force("charge", d3.forceManyBody().strength(chargeStrengthInput.property("value")))
-               .force("link", d3.forceLink(edges).id(d => d.id).strength(linkStrengthInput.property("value")).distance(linkDistanceInput.property("value")))
-                .alpha(1)
-                .restart();
-          }
-  }
-  function createGraph(data) {
-        nodes = data.nodes;
-        edges = data.edges;
-         // Remove any duplicate nodes based on id
-          const uniqueNodes = {};
-          nodes = nodes.filter(node => {
-             if (uniqueNodes[node.id]) {
-                return false;
-             }
-               uniqueNodes[node.id] = true
-              return true;
-          })
-
-        // Remove any duplicate edges
-        const uniqueEdges = {};
-        edges = edges.filter(edge => {
-            const edgeId = `${edge.source.id}-${edge.target.id}`;
-            if (uniqueEdges[edgeId] || uniqueEdges[`${edge.target.id}-${edge.source.id}`]) {
-                return false;
-            }
-            uniqueEdges[edgeId] = true;
-            return true;
-        });
-
-        simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(edges).id(d => d.id).strength(linkStrengthInput.property("value")).distance(linkDistanceInput.property("value")))
-            .force("charge", d3.forceManyBody().strength(chargeStrengthInput.property("value")))
-             .force("center", d3.forceCenter(width / 2, height / 2));
-
-
-         link = svg.append("g")
-           .attr("class", "links")
-            .attr("stroke", "#999")
-            .attr("stroke-opacity", 0.6)
-            .selectAll("line")
-            .data(edges)
-            .join("line")
-            .attr("class", "link")
-            .attr("stroke-width", 1);
-
-
-        node = svg.append("g")
-            .attr("class", "nodes")
-            .attr("stroke", "#fff")
-            .attr("stroke-width", 1.5)
-            .selectAll("g")
-             .data(nodes)
-            .join("g")
-            .attr("class", d => `node-group-${d.group}`)
-             .call(d3.drag()
-                .on("start", dragstarted)
-                 .on("drag", dragged)
-                .on("end", dragended))
-            .on("mouseover", mouseoverNode)
-             .on("mousemove", mousemoveNode)
-            .on("mouseout", mouseoutNode)
-             .on("click", clickNode)
-           .on("contextmenu", rightClickNode)
-
-
-       node.append("circle")
-            .attr("r", 10)
-            .attr("class", d => `node`);
-
-         node.append("text")
-              .attr("class", "icon-text")
-               .text(d => {
-                   if (d.group === "document") return "\uf15c";
-                   if (d.group === "topic") return "\uf02c";
-                   if (d.group === "stakeholder") return "\uf007";
-                    if (d.group === "entity") return "\uf0c1";
-                   return "";
-                 })
-               .append("title")
-                .text(d => d.label)
-
-       node.append("text")
-          .attr("class", "label-text")
-          .attr("y", 20)
-           .text(d => d.label);
-
-        simulation.on("tick", () => {
-            link
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
-
-           node
-              .attr("transform", d => `translate(${d.x},${d.y})`);
-        });
-
-        function dragstarted(event) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            event.subject.fx = event.subject.x;
-            event.subject.fy = event.subject.y;
-        }
-
-        function dragged(event) {
-            event.subject.fx = event.x;
-            event.subject.fy = event.y;
-        }
-
-        function dragended(event) {
-            if (!event.active) simulation.alphaTarget(0);
-            event.subject.fx = null;
-            event.subject.fy = null;
-        }
-    }
- function centerGraph() {
-  if (simulation) {
-      simulation.force("center", d3.forceCenter(width/2, height/2))
-      simulation.alpha(1).restart()
-    }
-}
-
- function mouseoverNode(event, d) {
-        tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        node.filter(n => n === d)
-            .classed("node-active", true);
-        link.filter(l => l.source === d || l.target === d)
-            .classed("link-active", true);
-    }
-    function mousemoveNode(event, d) {
-         let detailsHTML = "";
-        if (d.group === "document") {
-            detailsHTML = `
-                <p><strong>Summary:</strong> ${d.data.summary}</p>
-                <p><strong>Filename:</strong> ${d.data.filename}</p>
-                <p><strong>Filepath:</strong> ${d.data.filepath}</p>
-            `;
-        } else if (d.group === "topic") {
-            detailsHTML = `
-                <p><strong>Topic Name:</strong> ${d.data.topic_name}</p>
-                <p><strong>Topic Description:</strong> ${d.data.topic_description}</p>
-            `;
-        } else if (d.group === "stakeholder") {
-            detailsHTML = `
-                <p><strong>Stakeholder Name:</strong> ${d.data.stakeholder_name}</p>
-                <p><strong>Stakeholder Type:</strong> ${d.data.stakeholder_type}</p>
-            `;
-        }else if (d.group === "entity") {
-          detailsHTML = `
-            <p><strong>Entity Name:</strong> ${d.data.entity_name}</p>
-            <p><strong>Entity Description:</strong> ${d.data.entity_description}</p>
-            `;
-        }
-        tooltip.html(detailsHTML)
-           .style("left", (event.pageX + 10) + "px")
-           .style("top", (event.pageY - 30) + "px");
-    }
-   function mouseoutNode(event, d) {
-       tooltip.transition()
-           .duration(300)
-           .style("opacity", 0);
-       node.classed("node-active", false);
-        link.classed("link-active", false);
-    }
-   function clickNode(event, d) {
-            if (event.ctrlKey) {
-                // Control + click for multi-select
-                const index = selectedNodes.indexOf(d);
-                if (index === -1) {
-                  selectedNodes.push(d)
-                  d3.select(event.currentTarget).select('circle').classed("node-selected", true);
-                }
-                else {
-                   selectedNodes.splice(index, 1);
-                    d3.select(event.currentTarget).select('circle').classed("node-selected", false);
-               }
-             } else {
-               // Single click to clear selection and select
-                 const index = selectedNodes.indexOf(d)
-                if (index !== -1) {
-                     selectedNodes.splice(index, 1);
-                     d3.select(event.currentTarget).select('circle').classed("node-selected", false);
-                     return
-                 }
-                 node.selectAll('circle').classed("node-selected", false);
-              selectedNodes = [];
-              selectedNodes.push(d);
-             d3.select(event.currentTarget).select('circle').classed("node-selected", true);
-            }
-        event.stopPropagation()
-    }
-
-     function clearSelection(){
-       node.selectAll('circle').classed("node-selected", false);
-       selectedNodes = [];
-      contextMenu.style("display", "none"); // hide context menu
-     }
-    function rightClickNode(event, d) {
-        event.preventDefault();
-         contextMenu
-            .style("left", `${event.pageX}px`)
-           .style("top", `${event.pageY}px`)
-             .style("display", "block");
-
-         d3.select("#link-nodes-option")
-             .on("click", () => {
-                 linkNodes();
-                 contextMenu.style("display", "none");
-            });
-
-    }
-
-
-    function linkNodes() {
-      if (selectedNodes.length > 1) {
-          for(let i = 0; i < selectedNodes.length - 1; i++) {
-              let source = selectedNodes[i];
-               let target = selectedNodes[i+1];
-                const newEdge = {source: source, target: target};
-               const edgeId = `${source.id}-${target.id}`;
-              const edgeId2 = `${target.id}-${source.id}`
-              const edgeExists = edges.some(e => `${e.source.id}-${e.target.id}` === edgeId || `${e.source.id}-${e.target.id}` === edgeId2)
-            if (!edgeExists) {
-                edges.push(newEdge)
-             }
-          }
-      }
-
-        link = svg.select(".links")
-            .selectAll("line")
-            .data(edges, d => `${d.source.id}-${d.target.id}`)
-          .join("line")
-            .attr("class", "link")
-            .attr("stroke-width", 1);
-
-
-         simulation.force("link", d3.forceLink(edges).id(d => d.id).strength(linkStrengthInput.property("value")).distance(linkDistanceInput.property("value")))
-            .alpha(1).restart()
-
-    }
-
-
-    modalCloseButton.onclick = function () {
-        modal.style.display = "none";
-    };
-
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-         contextMenu.style("display", "none");
-    };
-    nodeTypeFilter.on("change", () => {
-       const selectedNodeType = nodeTypeFilter.property("value");
-        const filteredNodes = selectedNodeType === "all" ? nodes : nodes.filter(node => node.group === selectedNodeType);
-        node.data(filteredNodes, d => d.id)
-            .join(
-              enter => enter,
-              update => update,
-              exit => exit.remove()
-            )
-          link.data(edges.filter(edge => filteredNodes.some(n => n.id === edge.source.id) && filteredNodes.some(n => n.id === edge.target.id)), d => d.id)
-           .join(
-              enter => enter,
-              update => update,
-              exit => exit.remove()
-          )
-         simulation.nodes(filteredNodes).alpha(1).restart();
+    // --- Font Loading ---
+    const fontLoader = new THREE.FontLoader();
+    let font;
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (loadedFont) {
+        font = loadedFont;
     });
 
-    htmx.onLoad(() => {
+    // --- Camera Movement Settings ---
+    const moveSpeed = 10;
+    const tiltSpeed = 0.03;
+
+    // --- Helper Functions ---
+    function getMousePosition(event) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    function wrapText(text, maxWidth, fontSize) {
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = '';
+
+        for (const word of words) {
+            const testLine = currentLine + word + ' ';
+            const testLineWidth = measureTextWidth(testLine, fontSize);
+
+            if (testLineWidth > maxWidth && currentLine !== '') {
+                lines.push(currentLine);
+                currentLine = word + ' ';
+            } else {
+                currentLine = testLine;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+
+    function measureTextWidth(text, fontSize) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.font = `${fontSize}px sans-serif`;
+        const metrics = context.measureText(text);
+        return metrics.width;
+    }
+
+    function createTooltipSprite(text, position) {
+        if (!font) return null;
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const fontSize = TOOLTIP_FONT_SIZE;
+        const fontName = 'Arial';
+        const padding = 15;
+        const lineHeight = fontSize * 1.4;
+        const maxWidth = TOOLTIP_MAX_WIDTH;
+
+        context.font = `${fontSize}px ${fontName}`;
+        const lines = wrapText(text, maxWidth - 2 * padding, fontSize);
+        const textHeight = lines.length * lineHeight;
+        const cardWidth = maxWidth;
+        const cardHeight = textHeight + 2 * padding;
+        canvas.width = cardWidth * window.devicePixelRatio;
+        canvas.height = cardHeight * window.devicePixelRatio;
+        context.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        const borderRadius = 8;
+        const backgroundColor = 'rgba(50, 50, 50, 0.9)';
+        const textColor = '#eee';
+
+        context.fillStyle = backgroundColor;
+        context.roundRect(0, 0, cardWidth, cardHeight, borderRadius);
+        context.fill();
+
+        context.fillStyle = textColor;
+        context.font = `${fontSize}px ${fontName}`;
+        let y = padding + fontSize;
+        for (const line of lines) {
+            context.fillText(line, padding, y);
+            y += lineHeight;
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(cardWidth / 50 * 20, cardHeight / 50 * 20, 1);
+        sprite.position.copy(position);
+        return sprite;
+    }
+
+    // --- Event Handlers ---
+    function onMouseClick(event) {
+        const mousePos = getMousePosition(event);
+        mouse.x = (mousePos.x / renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = - (mousePos.y / renderer.domElement.clientHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        const nodeIntersects = raycaster.intersectObjects(scene.getObjectByName('nodeGroup').children);
+        const edgeIntersects = raycaster.intersectObjects(scene.getObjectByName('edgeGroup').children);
+
+        // Handle node clicks
+        if (nodeIntersects.length > 0) {
+            const intersectedNode = nodeIntersects[0].object;
+            const nodeId = intersectedNode.userData.id;
+
+            console.log('Clicked on node:', nodeId);
+
+            if (CLICKED_OBJECT === intersectedNode) {
+                // Remove existing tooltip and highlight
+                removeHighlightAndTooltip(CLICKED_OBJECT);
+                CLICKED_OBJECT = null;
+            } else {
+                // Remove previous highlight and tooltip if any
+                if (CLICKED_OBJECT) {
+                    removeHighlightAndTooltip(CLICKED_OBJECT);
+                }
+
+                // Create and add new tooltip and highlight
+                const tooltipText = `${intersectedNode.userData.label}\nDegree: ${intersectedNode.userData.degree}`;
+                const tooltipSprite = createTooltipSprite(tooltipText, intersectedNode.position.clone().add(new THREE.Vector3(0, 30, 0)));
+                if (tooltipSprite) {
+                    tooltipGroup.add(tooltipSprite);
+                    nodeTooltips[nodeId] = tooltipSprite;
+                    isTooltipVisible = true;
+                    console.log('Added tooltip for node:', nodeId);
+                }
+
+                CLICKED_OBJECT = intersectedNode;
+                if (CLICKED_OBJECT.material && CLICKED_OBJECT.material.emissive) {
+                    CLICKED_OBJECT.currentHex = intersectedNode.material.emissive.getHex();
+                    CLICKED_OBJECT.material.emissive.setHex(0xff9900);
+                    console.log('Added highlight for node:', nodeId);
+                }
+            }
+            return;
+        }
+
+        // Handle edge clicks
+        if (edgeIntersects.length > 0) {
+            const intersectedEdge = edgeIntersects[0].object;
+            const edgeData = intersectedEdge.userData;
+            const edgeKey = `${edgeData.source}-${edgeData.target}`;
+
+            console.log('Clicked on edge:', edgeKey);
+
+            if (CLICKED_OBJECT === intersectedEdge) {
+                // Remove existing tooltip and highlight
+                removeHighlightAndTooltip(CLICKED_OBJECT);
+                CLICKED_OBJECT = null;
+            } else {
+                // Remove previous highlight and tooltip if any
+                if (CLICKED_OBJECT) {
+                    removeHighlightAndTooltip(CLICKED_OBJECT);
+                }
+
+                // Create and add new tooltip and highlight
+                const sourceNode = nodes.find(node => node.id === edgeData.source);
+                const targetNode = nodes.find(node => node.id === edgeData.target);
+                if (sourceNode && targetNode) {
+                    const tooltipText = `Source: ${sourceNode.label}\nTarget: ${targetNode.label}`;
+                    const midpoint = intersectedEdge.geometry.parameters.path.getPoint(0.5);
+                    const worldMidpoint = intersectedEdge.localToWorld(midpoint.clone());
+                    const tooltipSprite = createTooltipSprite(tooltipText, worldMidpoint.add(new THREE.Vector3(0, 15, 0)));
+                    if (tooltipSprite) {
+                        tooltipGroup.add(tooltipSprite);
+                        edgeTooltips[edgeKey] = tooltipSprite;
+                        isTooltipVisible = true;
+                        console.log('Added tooltip for edge:', edgeKey);
+                    }
+
+                    CLICKED_OBJECT = intersectedEdge;
+                    if (CLICKED_OBJECT.material && CLICKED_OBJECT.material.color) {
+                        CLICKED_OBJECT.currentHex = intersectedEdge.material.color.getHex();
+                        CLICKED_OBJECT.material.color.setHex(0xffa500);
+                        console.log('Added highlight for edge:', edgeKey);
+                    }
+                }
+            }
+        }
+    }
+
+    function removeHighlightAndTooltip(object) {
+        if (!object) return;
+
+        if (object.userData && object.userData.id) { // It's a node
+            const nodeId = object.userData.id;
+            if (nodeTooltips[nodeId]) {
+                tooltipGroup.remove(nodeTooltips[nodeId]);
+                delete nodeTooltips[nodeId];
+                isTooltipVisible = false;
+                console.log('Removed tooltip for node:', nodeId);
+            }
+            if (object.material && object.material.emissive) {
+                object.material.emissive.setHex(object.currentHex);
+                console.log('Removed highlight for node:', nodeId);
+            }
+        } else if (object.userData && object.userData.source) { // It's an edge
+            const edgeKey = `${object.userData.source}-${object.userData.target}`;
+            if (edgeTooltips[edgeKey]) {
+                tooltipGroup.remove(edgeTooltips[edgeKey]);
+                delete edgeTooltips[edgeKey];
+                isTooltipVisible = false;
+                console.log('Removed tooltip for edge:', edgeKey);
+            }
+            if (object.material && object.material.color) {
+                object.material.color.setHex(object.currentHex);
+                console.log('Removed highlight for edge:', edgeKey);
+            }
+        }
+    }
+
+    function onMouseMove(event) {
+        const mousePos = getMousePosition(event);
+        mouse.x = (mousePos.x / renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = - (mousePos.y / renderer.domElement.clientHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        let newIntersected;
+
+        const nodeIntersects = raycaster.intersectObjects(scene.getObjectByName('nodeGroup').children);
+        if (nodeIntersects.length > 0) {
+            newIntersected = nodeIntersects[0].object;
+        } else {
+            const edgeIntersects = raycaster.intersectObjects(scene.getObjectByName('edgeGroup').children);
+            if (edgeIntersects.length > 0) {
+                newIntersected = edgeIntersects[0].object;
+            }
+        }
+
+        if (INTERSECTED !== newIntersected) {
+            if (INTERSECTED && INTERSECTED !== CLICKED_OBJECT) {
+                resetHighlight(INTERSECTED);
+            }
+            INTERSECTED = newIntersected;
+
+            // Apply hover highlight if not clicked
+            if (INTERSECTED && INTERSECTED !== CLICKED_OBJECT) {
+                applyHoverHighlight(INTERSECTED);
+            } else if (!INTERSECTED) {
+                // Reset highlight if mouse moves off all objects
+                if (INTERSECTED) { // Ensure there was a previously intersected object
+                    resetHighlight(INTERSECTED);
+                }
+            }
+        }
+
+        // Apply pulsing only if hovering over the CLICKED_OBJECT
+        if (INTERSECTED && INTERSECTED === CLICKED_OBJECT) {
+            pulseHighlight(INTERSECTED);
+        }
+    }
+
+    function resetHighlight(object) {
+        if (object.userData.id) {
+            if (object.material && object.material.emissive) {
+                object.material.emissive.setHex(object.currentHex);
+            }
+        } else if (object.userData.source) {
+            if (object.material && object.material.color) {
+                object.material.color.setHex(object.currentHex);
+            }
+        }
+    }
+
+    function applyHoverHighlight(object) {
+        if (object.userData.id) {
+            if (object.material && object.material.emissive) {
+                object.currentHex = object.material.emissive.getHex();
+                object.material.emissive.setHex(0xff0000);
+            }
+        } else if (object.userData.source) {
+            if (object.material && object.material.color) {
+                object.currentHex = object.material.color.getHex();
+                object.material.color.setHex(0xff8800);
+            }
+        }
+    }
+
+    let pulseDirection = 1;
+    const pulseSpeed = 0.05;
+    const minEmissiveIntensity = 0;
+    const maxEmissiveIntensity = 0.5;
+
+    function pulseHighlight(object) {
+        if (object.userData.id && object.material && object.material.emissive) {
+            const currentIntensity = object.material.emissiveIntensity;
+            object.material.emissiveIntensity += pulseDirection * pulseSpeed;
+
+            if (object.material.emissiveIntensity > maxEmissiveIntensity) {
+                object.material.emissiveIntensity = maxEmissiveIntensity;
+                pulseDirection = -1;
+            } else if (object.material.emissiveIntensity < minEmissiveIntensity) {
+                object.material.emissiveIntensity = minEmissiveIntensity;
+                pulseDirection = 1;
+            }
+        } else if (object.userData.source && object.material && object.material.color) {
+            // You can implement a similar color pulsing for edges if needed
+            // For simplicity, we'll leave the color as is for now
+        }
+    }
+
+    function onKeyDown(event) {
+        const cameraMoveDirection = new THREE.Vector3();
+        const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        switch (event.code) {
+            case 'ArrowUp': euler.x = -tiltSpeed; break;
+            case 'ArrowDown': euler.x = tiltSpeed; break;
+            case 'ArrowLeft': euler.y = -tiltSpeed; break;
+            case 'ArrowRight': euler.y = tiltSpeed; break;
+        }
+
+        camera.rotation.x += euler.x;
+        camera.rotation.y += euler.y;
+        camera.rotation.x = Math.max(- Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+    }
+
+    // --- Graph Creation ---
+    const createGraph = function (data) {
+        console.log('Creating graph with data:', data);
+        nodes = data.nodes;
+        edges = data.edges;
+
+        let nodeGroup = scene.getObjectByName('nodeGroup');
+        if (!nodeGroup) {
+            nodeGroup = new THREE.Group();
+            nodeGroup.name = 'nodeGroup';
+            scene.add(nodeGroup);
+        } else {
+            nodeGroup.clear();
+        }
+
+        let edgeGroup = scene.getObjectByName('edgeGroup');
+        if (!edgeGroup) {
+            edgeGroup = new THREE.Group();
+            edgeGroup.name = 'edgeGroup';
+            scene.add(edgeGroup);
+        } else {
+            edgeGroup.clear();
+        }
+
+        const maxDegree = nodes.reduce((max, node) => Math.max(max, node.degree), 0);
+        const degreeScale = d3.scaleLinear().domain([1, maxDegree]).range([NODE_SCALE_FACTOR_MIN, NODE_SCALE_FACTOR_MAX]);
+        const zScale = d3.scaleLinear().domain([0, maxDegree]).range([-500, 500]);
+        const orbitingNodes = {};
+
+        nodes.forEach(nodeData => {
+            const node = createNode(nodeData, maxDegree);
+            node.name = nodeData.name;
+            nodeGroup.add(node);
+
+            if (nodeData.degree === 1) {
+                const parentEdge = edges.find(edge => edge.source === nodeData.id || edge.target === nodeData.id);
+                if (parentEdge) {
+                    const parentId = parentEdge.source === nodeData.id ? parentEdge.target : parentEdge.source;
+                    orbitingNodes[nodeData.id] = { parentId: parentId };
+                }
+            }
+        });
+
+        nodes.forEach(nodeData => {
+            const node = nodeGroup.children.find(child => child.name === nodeData.name);
+            const degreeValue = degreeScale(nodeData.degree);
+            const z = zScale(nodeData.degree);
+            const randomRadius = Math.random() * 200;
+            const angle = Math.random() * Math.PI * 2;
+
+            if (nodeData.degree === 1 && orbitingNodes[nodeData.id]) {
+                const parent = nodeGroup.children.find(child => child.name === orbitingNodes[nodeData.id].parentId);
+                if (parent) {
+                    const orbitRadius = 200 + (Math.random() * 100);
+                    const phi = Math.random() * Math.PI;
+                    const theta = Math.random() * Math.PI * 2;
+                    node.position.set(
+                        parent.position.x + Math.sin(phi) * Math.cos(theta) * orbitRadius,
+                        parent.position.y + Math.sin(phi) * Math.sin(theta) * orbitRadius,
+                        parent.position.z + Math.cos(phi) * orbitRadius
+                    );
+                }
+            } else if (nodeData.degree === 0) {
+                const oortRadius = 800 + Math.random() * 400;
+                const phi = Math.random() * Math.PI;
+                const theta = Math.random() * Math.PI * 2;
+                node.position.set(
+                    Math.sin(phi) * Math.cos(theta) * oortRadius,
+                    Math.sin(phi) * Math.sin(theta) * oortRadius,
+                    Math.cos(phi) * oortRadius
+                );
+            } else {
+                const x = Math.cos(angle) * (randomRadius + degreeValue);
+                const y = Math.sin(angle) * (randomRadius + degreeValue);
+                node.position.set(x, y, z);
+            }
+        });
+
+        nodes.forEach(nodeData => {
+            if (nodeData.degree > 1) {
+                const node = nodeGroup.children.find(child => child.name === nodeData.name);
+                let orbitCount = 0;
+                let midX = 0, midY = 0, midZ = 0;
+                for (const child of nodeGroup.children) {
+                    if (orbitingNodes[child.name] && orbitingNodes[child.name].parentId === nodeData.name) {
+                        orbitCount++;
+                        midX += child.position.x;
+                        midY += child.position.y;
+                        midZ += child.position.z;
+                    }
+                }
+                if (orbitCount > 1) {
+                    node.position.set(midX / orbitCount, midY / orbitCount, midZ / orbitCount);
+                }
+            }
+        });
+
+        edges.forEach(edgeData => {
+            const edge = createEdge(edgeData);
+            if (edge) {
+                edge.userData = edgeData;
+                edgeGroup.add(edge);
+            }
+        });
+    };
+
+    function createNode(nodeData, maxDegree) {
+        let geometry;
+        const baseSize = NODE_BASE_SIZE;
+        let size = baseSize;
+
+        if (nodeData.degree > 1) {
+            size = baseSize * d3.scaleLinear().domain([1, maxDegree]).range([NODE_SCALE_FACTOR_MIN, NODE_SCALE_FACTOR_MAX])(nodeData.degree);
+        } else if (nodeData.degree === 0) {
+            size = baseSize * 0.6;
+        }
+
+        const scale = size / baseSize;
+
+        switch (nodeData.group) {
+            case "document":
+                geometry = new THREE.BoxGeometry(20 * scale, 30 * scale, 5 * scale);
+                break;
+            case "stakeholder":
+                geometry = new THREE.ConeGeometry(15 * scale, 30 * scale, 32);
+                break;
+            case "entity":
+            case "topic":
+            default:
+                geometry = new THREE.SphereGeometry(baseSize * scale, 32, 32);
+                break;
+        }
+
+        let material;
+        switch (nodeData.group) {
+            case "document":
+                material = new THREE.MeshStandardMaterial({ color: NODE_COLOR_DOCUMENT, emissive: 0x000000 });
+                break;
+            case "topic":
+                material = new THREE.MeshStandardMaterial({ color: NODE_COLOR_TOPIC, emissive: 0x000000 });
+                break;
+            case "entity":
+                material = new THREE.MeshStandardMaterial({ color: NODE_COLOR_ENTITY, emissive: 0x000000 });
+                break;
+            case "stakeholder":
+                material = new THREE.MeshStandardMaterial({ color: NODE_COLOR_STAKEHOLDER, emissive: 0x000000 });
+                break;
+            default:
+                material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x000000 });
+                break;
+        }
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData = nodeData;
+        return mesh;
+    }
+
+    function createEdge(edgeData) {
+        const nodeGroup = scene.getObjectByName('nodeGroup');
+        if (!nodeGroup) {
+            return null;
+        }
+
+        let sourceNode = nodeGroup.children.find(child => child.name === edgeData.source);
+        let targetNode = nodeGroup.children.find(child => child.name === edgeData.target);
+
+        if (sourceNode && targetNode) {
+            const startPoint = sourceNode.position;
+            const endPoint = targetNode.position;
+            const midPoint = new THREE.Vector3().addVectors(startPoint, endPoint).multiplyScalar(0.5);
+            const controlPointOffset = new THREE.Vector3(
+                (Math.random() - 0.5) * EDGE_CURVE_OFFSET,
+                (Math.random() - 0.5) * EDGE_CURVE_OFFSET,
+                (Math.random() - 0.5) * EDGE_CURVE_OFFSET
+            );
+            const controlPoint = midPoint.add(controlPointOffset);
+            const curve = new THREE.CubicBezierCurve3(startPoint, controlPoint, controlPoint, endPoint);
+            const geometry = new THREE.TubeGeometry(curve, 20, 2, 8, false);
+            const material = new THREE.MeshBasicMaterial({ color: EDGE_COLOR });
+            const tube = new THREE.Mesh(geometry, material);
+            tube.renderOrder = 0;
+            return tube;
+        } else {
+            console.log('Could not create edge. Source or target node missing for:', edgeData.source, edgeData.target);
+            return null;
+        }
+    }
+
+    // --- Update Graph Function ---
+    function updateGraphFromControls() {
+        NODE_BASE_SIZE = parseFloat(document.getElementById('nodeBaseSize').value);
+        NODE_SCALE_FACTOR_MIN = parseFloat(document.getElementById('nodeScaleFactorMin').value);
+        NODE_SCALE_FACTOR_MAX = parseFloat(document.getElementById('nodeScaleFactorMax').value);
+        NODE_COLOR_DOCUMENT = new THREE.Color(document.getElementById('nodeColorDocument').value);
+        NODE_COLOR_TOPIC = new THREE.Color(document.getElementById('nodeColorTopic').value);
+        NODE_COLOR_ENTITY = new THREE.Color(document.getElementById('nodeColorEntity').value);
+        NODE_COLOR_STAKEHOLDER = new THREE.Color(document.getElementById('nodeColorStakeholder').value);
+        EDGE_COLOR = new THREE.Color(document.getElementById('edgeColor').value);
+        EDGE_CURVE_OFFSET = parseFloat(document.getElementById('edgeCurveOffset').value);
+        TOOLTIP_FONT_SIZE = parseFloat(document.getElementById('tooltipFontSize').value);
+        TOOLTIP_MAX_WIDTH = parseFloat(document.getElementById('tooltipMaxWidth').value);
+
         fetch('/graph_data')
             .then(response => response.json())
             .then(data => {
                 createGraph(data);
+            });
+    }
+
+    // --- Animation Loop ---
+    function animate() {
+        requestAnimationFrame(animate);
+        orbitControls.update();
+
+        for (const nodeId in nodeTooltips) {
+            if (nodeTooltips[nodeId]) {
+                nodeTooltips[nodeId].lookAt(camera.position);
+            }
+        }
+        for (const edgeKey in edgeTooltips) {
+            if (edgeTooltips[edgeKey]) {
+                edgeTooltips[edgeKey].lookAt(camera.position);
+            }
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    // --- Event Listeners ---
+    renderer.domElement.addEventListener('click', onMouseClick);
+    renderer.domElement.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('keydown', onKeyDown);
+
+    function onWindowResize() {
+        camera.aspect = chartContainer.clientWidth / chartContainer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(chartContainer.clientWidth, chartContainer.clientHeight);
+    }
+    window.addEventListener('resize', onWindowResize, false);
+
+    document.getElementById('updateGraphButton').addEventListener('click', updateGraphFromControls);
+
+    
+
+    // --- HTMX Integration ---
+    htmx.onLoad(() => {
+        console.log('HTMX loaded');
+        fetch('/graph_data')
+            .then(response => response.json())
+            .then(data => {
+                createGraph(data);
+                animate();
             });
     });
 </script>

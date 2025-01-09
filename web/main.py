@@ -246,65 +246,74 @@ async def get_graph_data(
 
     nodes = []
     edges = []
+    node_degrees = {}
 
     # Add documents as nodes
     for document in documents:
+        node_id = f"document-{document.id}"
         nodes.append({
-            "id": f"document-{document.id}",
+            "id": node_id,
+            "name": node_id,
             "label": document.filename,
             "group": "document",
-            "data": document.model_dump()
+           "degree": 0
         })
+        node_degrees[node_id] = 0
 
     # Add topics as nodes
     for topic in topics:
-        nodes.append({
-            "id": f"topic-{topic.id}",
+         node_id = f"topic-{topic.id}"
+         nodes.append({
+            "id": node_id,
+             "name": node_id,
             "label": topic.topic_name,
             "group": "topic",
-            "data": topic.model_dump()
-        })
+            "degree": 0
 
+        })
+         node_degrees[node_id] = 0
+         
     # Add entities as nodes
     for entity in entities:
-        nodes.append({
-            "id": f"entity-{entity.id}",
+         node_id = f"entity-{entity.id}"
+         nodes.append({
+             "id": node_id,
+              "name": node_id,
             "label": entity.entity_name,
             "group": "entity",
-            "data": entity.model_dump()
+            "degree": 0
+
         })
+         node_degrees[node_id] = 0
     
     # Add stakeholders as nodes
     for stakeholder in stakeholders:
-        nodes.append({
-            "id": f"stakeholder-{stakeholder.id}",
+          node_id = f"stakeholder-{stakeholder.id}"
+          nodes.append({
+             "id": node_id,
+            "name": node_id,
             "label": stakeholder.stakeholder_name,
             "group": "stakeholder",
-            "data": stakeholder.model_dump()
+            "degree": 0
+
         })
-
-    # # Create edges based on relationships (example: document-topic)
-    # for document in documents:
-    #     for topic in views.get_topics_for_document(bus.uow, document.id):  # Assuming this view function exists
-    #         edges.append({
-    #             "source": f"document-{document.id}",
-    #             "target": f"topic-{topic.id}"
-    #         })
-
-    # for topic in topics:
-    #   for entity in views.get_entities_for_topic(bus.uow, topic.id):
-    #     edges.append({
-    #             "source": f"topic-{topic.id}",
-    #             "target": f"entity-{entity.id}"
-    #         })
-
+          node_degrees[node_id] = 0
+    
+    # Create edges based on relationships
     for document in documents:
-      for entity in document.entities:
-        edges.append({
-                "source": f"document-{document.id}",
-                "target": f"entity-{entity.id}"
-            })
+        for entity in document.entities:
+              source_id = f"document-{document.id}"
+              target_id = f"entity-{entity.id}"
+              edges.append({
+                 "source": source_id,
+                 "target": target_id,
+                 })
+              node_degrees[source_id] += 1
+              node_degrees[target_id] += 1
+    
+    for node in nodes:
+        node["degree"] = node_degrees[node["id"]]
 
-    # Add similar logic for other relationships (e.g., topic-entity, entity-stakeholder)
+
 
     return {"nodes": nodes, "edges": edges}
