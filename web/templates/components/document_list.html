@@ -7,11 +7,11 @@
             <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header">Document</th>
                 <th scope="col" class="govuk-table__header"></th>
-                <th scope="col" class="govuk-table__header">Links</th>
+                <th scope="col" class="govuk-table__header"></th>
             </tr>
         </thead>
 
-        <tbody class="govuk-table__body">
+        <tbody class="govuk-table__body" id="documents">
             {% if documents %}
 
             {% for document in documents %}
@@ -26,16 +26,16 @@
 
     </table>
     
-    <form hx-post="/documents" hx-target="#documents" hx-swap="outerHTML">
-        <div class="govuk-form-group">
-            <label class="govuk-label" for="filename">Filename</label>
-            <input class="govuk-input" id="filename" name="filename" type="text">
-        </div>
-        <div class="govuk-form-group">
-            <label class="govuk-label" for="filepath">Filepath</label>
-            <input class="govuk-input" id="filepath" name="filepath" type="text">
+    <form
+    hx-post="/documents" 
+    hx-target="#documents" 
+    hx-swap="beforeend" 
+    hx-on::after-request="if(event.detail.successful) this.reset()"
+    enctype="multipart/form-data">
+         <div class="govuk-form-group">
+            <label class="govuk-label" for="document">Upload Document</label>
+            <input class="govuk-file-upload" id="document" name="document" type="file" accept=".pdf">
         </div>
         <button class="govuk-button" type="submit">Add Document</button>
     </form>
-    
 </div>

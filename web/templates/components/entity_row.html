@@ -12,27 +12,5 @@
             class="govuk-button govuk-button--warning">Delete</button>
     </td>
 
-    <td class="govuk-table__cell">
-
-        {% if entity.documents %}
-        <details class="govuk-details">
-            <summary class="govuk-details__summary">
-                <span class="govuk-details__summary-text">
-                    Documents
-                </span>
-            </summary>
-            <div class="govuk-details__text">
-
-                <ul class="govuk-list govuk-list--bullet"
-                    style="max-height: 150px; overflow-y: auto; overflow-x: hidden; white-space: normal;">
-                    {% for document in entity.documents %}
-                    <li>{{ document.filename }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </details>
-        {% endif %}
-
-    </td>
 
 </tr>

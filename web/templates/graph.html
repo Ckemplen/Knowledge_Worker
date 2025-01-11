@@ -34,8 +34,6 @@
 
     #control-panel button {
         padding: 10px 15px;
-        background-color: #4CAF50;
-        color: white;
         border: none;
         cursor: pointer;
     }
@@ -49,7 +47,7 @@
 
 <div class="govuk-grid-column-one-quarter">
     <div id="control-panel">
-        <h2 class="govuk-heading">Graph Controls</h2>
+        <h2 class="govuk-heading-l">Graph Controls</h2>
     
         <label class="govuk-label" for="nodeBaseSize">Node Base Size:</label>
         <input class="govuk-input" type="number" id="nodeBaseSize" value="15">
@@ -84,7 +82,7 @@
         <label class="govuk-label" for="tooltipMaxWidth">Tooltip Max Width:</label>
         <input class="govuk-input" type="number" id="tooltipMaxWidth" value="250">
     
-        <button id="updateGraphButton">Update Graph</button>
+        <button class="govuk-button" id="updateGraphButton">Update Graph</button>
     </div>
 </div>
 </div>
@@ -100,17 +98,17 @@
 
 <script>
     // --- Editable Constants ---
-    let NODE_BASE_SIZE = 15;
-    let NODE_SCALE_FACTOR_MIN = 3;
-    let NODE_SCALE_FACTOR_MAX = 1;
+    let NODE_BASE_SIZE = 6;
+    let NODE_SCALE_FACTOR_MIN = 1;
+    let NODE_SCALE_FACTOR_MAX = 3;
     let NODE_COLOR_DOCUMENT = 0x12436D;
     let NODE_COLOR_TOPIC = 0x28A197;
     let NODE_COLOR_ENTITY = 0x801650;
     let NODE_COLOR_STAKEHOLDER = 0xF46A25;
     let EDGE_COLOR = 0x999999;
-    let EDGE_CURVE_OFFSET = 100;
-    let TOOLTIP_FONT_SIZE = 16;
-    let TOOLTIP_MAX_WIDTH = 250;
+    let EDGE_CURVE_OFFSET = 110;
+    let TOOLTIP_FONT_SIZE = 36;
+    let TOOLTIP_MAX_WIDTH = 450;
 
     // --- Initialization ---
     console.log('Initializing Three.js scene...');

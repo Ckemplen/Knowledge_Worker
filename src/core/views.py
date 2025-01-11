@@ -1,5 +1,6 @@
 from core.service_layer import unit_of_work
 from sqlalchemy import text
+import domain.model
 
 
 def get_all_documents(uow: unit_of_work.SqlAlchemyUnitOfWork):
@@ -46,7 +47,7 @@ def get_document_by_filename(uow: unit_of_work.SqlAlchemyUnitOfWork, filename: s
                 {"filename": filename},
             )
         ).fetchone()
-    return dict(result) if result else None
+    return domain.model.Document(result) if result else None
 
 def get_document_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
     with uow:
