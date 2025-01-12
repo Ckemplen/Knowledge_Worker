@@ -8,7 +8,7 @@ from core.adapters import llm_connectors
 from core.service_layer import messagebus, unit_of_work
 from core.domain import commands
 
-from .routers import documents, stakeholders, entities, graphs
+from .routers import documents, stakeholders, entities, graphs, topics
 from .dependenicies import get_bus
 
 from typing import Dict, Union, List, Any
@@ -25,6 +25,7 @@ templates = Jinja2Templates(directory="web/templates")
 app.include_router(documents.router)
 app.include_router(stakeholders.router)
 app.include_router(entities.router)
+app.include_router(topics.router)
 app.include_router(graphs.router)
 
 

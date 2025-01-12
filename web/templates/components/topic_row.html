@@ -1,15 +1,16 @@
-<tr class="govuk-table__row" id="topic-{{ topic.id }}">
+<tr class="govuk-table__row" id="topic-{{ topic.id }}" hx-target="this" hx-swap="outerHTML">
 
     <td class="govuk-table__cell">
         <a href="" class="govuk-link">{{ topic.topic_name }}</a>
+        <p class="govuk-body">{{topic.topic_description}}</p>
     </td>
 
     <td class="govuk-table__cell">
-        <button hx-delete="/topics/{{ topic.id }}" hx-target="#topic-{{ topic.id }}" hx-swap="outerHTML" class="govuk-button govuk-button--secondary">Delete</button>
+        <button hx-get="/topics/{{ topic.id }}/edit" class="govuk-button govuk-button--secondary">Edit</button>
+        <br>
+        <button hx-delete="/topics/{{ topic.id }}" hx-target="#topics-tab" hx-swap="outerHTML"
+            class="govuk-button govuk-button--warning">Delete</button>
     </td>
 
-    <td class="govuk-table__cell">
-        <button hx-get="/topics/{{ topic.id }}/edit" hx-target="#topic-{{ topic.id }}" hx-swap="outerHTML" class="govuk-button govuk-button--secondary">Edit</button>
-    </td>
 
 </tr>

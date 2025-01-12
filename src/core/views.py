@@ -34,6 +34,11 @@ def get_entity_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
         result = uow.entities.get(reference=id)
     return result
 
+def get_topic_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
+    with uow:
+        result = uow.topics.get(reference=id)
+    return result
+
 def get_document_by_filename(uow: unit_of_work.SqlAlchemyUnitOfWork, filename: str):
     with uow:
         result = uow.session.execute(
