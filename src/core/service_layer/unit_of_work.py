@@ -1,4 +1,5 @@
 import core.adapters.repository as repository
+import core.config
 import abc
 
 from sqlalchemy import create_engine
@@ -6,15 +7,15 @@ from sqlalchemy.orm import sessionmaker
 
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
-    bind=create_engine(
-        "sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite",  # echo=config.DB_ECHO
-    )
+    # bind=create_engine(
+    #     "sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite",  # echo=config.DB_ECHO
+    # )
     # bind=create_engine(
     #     "sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite",  # echo=config.DB_ECHO
     # )
-    # bind=create_engine(
-    #     f"sqlite:///{config.DATABASE_PATH}", # echo=config.DB_ECHO
-    # )
+    bind=create_engine(
+        f"sqlite:///{core.config.DATABASE_PATH}", # echo=config.DB_ECHO
+    )
 )
 
 

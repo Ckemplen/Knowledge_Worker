@@ -1,6 +1,6 @@
 from core.service_layer import unit_of_work
 from sqlalchemy import text
-import domain.model
+import core.domain.model
 
 
 def get_all_documents(uow: unit_of_work.SqlAlchemyUnitOfWork):

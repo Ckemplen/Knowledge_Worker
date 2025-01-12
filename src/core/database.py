@@ -2,15 +2,17 @@ import sqlite3
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+import core.config
+
 Base = declarative_base()
 
-#engine = create_engine(f"sqlite:///{config.DATABASE_PATH}", echo=True)
+engine = create_engine(f"sqlite:///{core.config.DATABASE_PATH}", echo=True)
 # engine = create_engine(
 #     "sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite", echo=True
 # )
-engine = create_engine(
-    "sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite", echo=True
-)
+# engine = create_engine(
+#     "sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite", echo=True
+# )
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 

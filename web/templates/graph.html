@@ -677,7 +677,7 @@
         TOOLTIP_FONT_SIZE = parseFloat(document.getElementById('tooltipFontSize').value);
         TOOLTIP_MAX_WIDTH = parseFloat(document.getElementById('tooltipMaxWidth').value);
 
-        fetch('/graph_data')
+        fetch('/graphs/node_edge_graph_data')
             .then(response => response.json())
             .then(data => {
                 createGraph(data);
