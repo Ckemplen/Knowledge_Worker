@@ -9,15 +9,24 @@
         <div class="govuk-button-group">
             <button hx-get="/entities/{{ entity.id }}/edit" 
                     class="govuk-button govuk-button--secondary"
-                    aria-label="Edit {{ entity.entity_name }}">
+                    aria-label="Edit {{ entity.entity_name }}"
+                    hx-indicator="#loading-{{ entity.id }}">
                 Edit
+                <span id="loading-{{ entity.id }}" class="htmx-indicator govuk-visually-hidden">
+                    Loading...
+                </span>
             </button>
             <button hx-delete="/entities/{{ entity.id }}" 
                     hx-target="#entities-tab" 
                     hx-swap="outerHTML"
                     class="govuk-button govuk-button--warning"
-                    aria-label="Delete {{ entity.entity_name }}">
+                    aria-label="Delete {{ entity.entity_name }}"
+                    hx-confirm="Are you sure you want to delete this entity?"
+                    hx-indicator="#loading-delete-{{ entity.id }}">
                 Delete
+                <span id="loading-delete-{{ entity.id }}" class="htmx-indicator govuk-visually-hidden">
+                    Deleting...
+                </span>
             </button>
         </div>
     </td>

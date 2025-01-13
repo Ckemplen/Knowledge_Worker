@@ -31,11 +31,18 @@
     hx-target="#documents" 
     hx-swap="beforeend" 
     hx-on::after-request="if(event.detail.successful) this.reset()"
-    enctype="multipart/form-data">
+    enctype="multipart/form-data"
+    hx-indicator="#upload-loading">
          <div class="govuk-form-group">
             <label class="govuk-label" for="document">Upload Document</label>
             <input class="govuk-file-upload" id="document" name="document" type="file" accept=".pdf">
         </div>
-        <button class="govuk-button" type="submit">Add Document</button>
+        <button class="govuk-button" type="submit">
+            Add Document
+            <span id="upload-loading" class="htmx-indicator govuk-visually-hidden">
+                Uploading...
+            </span>
+        </button>
+        <div id="upload-error" class="govuk-error-message" hidden></div>
     </form>
 </div>
