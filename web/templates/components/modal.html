@@ -67,17 +67,21 @@
          modal.hide();
      });
 
-    // Add htmx confirmation handler
-    document.body.addEventListener('htmx:confirm', function(evt) {
-        evt.preventDefault();
+    // Delete confirmation handler
+    function showDeleteConfirmation(name, url) {
         modal.show(
-            'Confirmation',
-            evt.detail.question,
+            'Delete Confirmation',
+            `Are you sure you want to delete "${name}"? This action cannot be undone.`,
             [
                 {
-                    text: 'Confirm',
+                    text: 'Delete',
                     classes: 'govuk-button--warning',
-                    callback: () => evt.detail.issueRequest(true)
+                    callback: () => {
+                        htmx.ajax('DELETE', url, {
+                            target: '#stakeholders-tab',
+                            swap: 'outerHTML'
+                        });
+                    }
                 },
                 {
                     text: 'Cancel',
@@ -85,7 +89,7 @@
                 }
             ]
         );
-    });
+    }
 </script>
 
 <style>

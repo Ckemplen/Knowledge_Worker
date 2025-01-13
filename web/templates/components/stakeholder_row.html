@@ -16,12 +16,9 @@
                     Loading...
                 </span>
             </button>
-            <button class="govuk-button govuk-button--warning"
+            <button onclick="showDeleteConfirmation('{{ stakeholder.stakeholder_name }}', '/stakeholders/{{ stakeholder.id }}')"
+                    class="govuk-button govuk-button--warning"
                     aria-label="Delete {{ stakeholder.stakeholder_name }}"
-                    hx-delete="/stakeholders/{{ stakeholder.id }}"
-                    hx-target="#stakeholders-tab"
-                    hx-swap="outerHTML"
-                    hx-confirm="Are you sure you want to delete '{{ stakeholder.stakeholder_name }}'?"
                     hx-indicator="#loading-delete-{{ stakeholder.id }}">
                 Delete
                 <span id="loading-delete-{{ stakeholder.id }}" class="htmx-indicator govuk-visually-hidden">
