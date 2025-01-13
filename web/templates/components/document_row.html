@@ -19,18 +19,21 @@
                     Loading...
                 </span>
             </button>
-            <button hx-delete="/documents/{{ document.id }}" 
-                    hx-target="#entities-tab" 
-                    hx-swap="outerHTML"
-                    class="govuk-button govuk-button--warning"
-                    aria-label="Delete {{ document.filename }}"
-                    data-confirm="Are you sure you want to delete the document '{{ document.filename }}'?"
-                    hx-indicator="#loading-delete-{{ document.id }}">
+            <button onclick="showDeleteConfirmation('{{ document.filename }}', () => {
+                    htmx.trigger(this, 'confirmed-delete');
+                })"
+                class="govuk-button govuk-button--warning"
+                aria-label="Delete {{ document.filename }}"
+                hx-indicator="#loading-delete-{{ document.id }}">
                 Delete
                 <span id="loading-delete-{{ document.id }}" class="htmx-indicator govuk-visually-hidden">
                     Deleting...
                 </span>
             </button>
+            <div hx-delete="/documents/{{ document.id }}" 
+                 hx-target="#entities-tab" 
+                 hx-swap="outerHTML"
+                 hx-trigger="confirmed-delete"></div>
         </div>
     </td>
 

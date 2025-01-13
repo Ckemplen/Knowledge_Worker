@@ -1,0 +1,23 @@
+<div id="delete-confirmation" hidden>
+    <!-- This will be populated by JavaScript -->
+</div>
+
+<script>
+    function showDeleteConfirmation(itemName, deleteCallback) {
+        dialog.show(
+            'Delete Confirmation',
+            `Are you sure you want to delete "${itemName}"?`,
+            [
+                {
+                    text: 'Delete',
+                    classes: 'govuk-button--warning',
+                    callback: deleteCallback
+                },
+                {
+                    text: 'Cancel',
+                    classes: 'govuk-button--secondary'
+                }
+            ]
+        );
+    }
+</script>

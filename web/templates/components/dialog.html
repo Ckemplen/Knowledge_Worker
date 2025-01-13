@@ -1,21 +1,14 @@
-<div id="dialog" class="govuk-width-container" hidden>
+<div id="base-dialog" class="govuk-width-container" hidden>
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
             <div class="govuk-notification-banner" role="region" aria-labelledby="dialog-title">
                 <div class="govuk-notification-banner__header">
-                    <h2 class="govuk-notification-banner__title" id="dialog-title">
-                        Confirmation
-                    </h2>
+                    <h2 class="govuk-notification-banner__title" id="dialog-title"></h2>
                 </div>
                 <div class="govuk-notification-banner__content">
                     <p class="govuk-body" id="dialog-message"></p>
-                    <div class="govuk-button-group">
-                        <button id="dialog-confirm" class="govuk-button govuk-button--warning">
-                            Confirm
-                        </button>
-                        <button id="dialog-cancel" class="govuk-button govuk-button--secondary">
-                            Cancel
-                        </button>
+                    <div class="govuk-button-group" id="dialog-actions">
+                        <!-- Buttons will be injected here -->
                     </div>
                 </div>
             </div>
@@ -24,35 +17,65 @@
 </div>
 
 <script>
-    function showDialog(message, confirmCallback) {
-        const dialog = document.getElementById('dialog');
-        const dialogMessage = document.getElementById('dialog-message');
-        const confirmBtn = document.getElementById('dialog-confirm');
-        const cancelBtn = document.getElementById('dialog-cancel');
-        
-        // Set message
-        dialogMessage.textContent = message;
-        
-        // Show dialog
-        dialog.hidden = false;
-        
-        // Handle confirm
-        confirmBtn.onclick = function() {
-            dialog.hidden = true;
-            confirmCallback();
-        };
-        
-        // Handle cancel
-        cancelBtn.onclick = function() {
-            dialog.hidden = true;
-        };
+    class Dialog {
+        constructor() {
+            this.dialog = document.getElementById('base-dialog');
+            this.title = document.getElementById('dialog-title');
+            this.message = document.getElementById('dialog-message');
+            this.actions = document.getElementById('dialog-actions');
+        }
+
+        show(title, message, buttons) {
+            // Clear previous buttons
+            this.actions.innerHTML = '';
+            
+            // Set content
+            this.title.textContent = title;
+            this.message.textContent = message;
+            
+            // Add buttons
+            buttons.forEach(button => {
+                const btn = document.createElement('button');
+                btn.className = `govuk-button ${button.classes || ''}`;
+                btn.textContent = button.text;
+                btn.onclick = () => {
+                    this.hide();
+                    if (button.callback) {
+                        button.callback();
+                    }
+                };
+                this.actions.appendChild(btn);
+            });
+            
+            // Show dialog
+            this.dialog.hidden = false;
+        }
+
+        hide() {
+            this.dialog.hidden = true;
+        }
     }
-    
+
+    // Create global dialog instance
+    const dialog = new Dialog();
+
     // Add htmx confirmation handler
     document.body.addEventListener('htmx:confirm', function(evt) {
         evt.preventDefault();
-        showDialog(evt.detail.question, function() {
-            evt.detail.issueRequest(true);
-        });
+        dialog.show(
+            'Confirmation',
+            evt.detail.question,
+            [
+                {
+                    text: 'Confirm',
+                    classes: 'govuk-button--warning',
+                    callback: () => evt.detail.issueRequest(true)
+                },
+                {
+                    text: 'Cancel',
+                    classes: 'govuk-button--secondary'
+                }
+            ]
+        );
     });
 </script>
