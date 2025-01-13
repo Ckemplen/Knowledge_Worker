@@ -20,12 +20,35 @@ router = APIRouter(
 
 
 @router.get("/{topic_id}", response_class=HTMLResponse)
-async def get_topic_row_edit_form(
-    request: Request, topic_id: int, bus: messagebus.MessageBus = Depends(get_bus)
+async def get_topic_row(
+    request: Request, 
+    topic_id: int, 
+    bus: messagebus.MessageBus = Depends(get_bus)
 ):
     topic = views.get_topic_by_id(uow=bus.uow, id=topic_id)
     return templates.TemplateResponse(
         "components/topic_row.html",
-        {"request": request, "topic": topic},
-        status_code=200,  # Retrieved successfully
+        {
+            "request": request, 
+            "topic": topic,
+            "edit_mode": False
+        },
+        status_code=200,
+    )
+
+@router.get("/{topic_id}/edit", response_class=HTMLResponse)
+async def get_topic_row_edit_form(
+    request: Request, 
+    topic_id: int, 
+    bus: messagebus.MessageBus = Depends(get_bus)
+):
+    topic = views.get_topic_by_id(uow=bus.uow, id=topic_id)
+    return templates.TemplateResponse(
+        "components/topic_row.html",
+        {
+            "request": request, 
+            "topic": topic,
+            "edit_mode": True
+        },
+        status_code=200,
     )

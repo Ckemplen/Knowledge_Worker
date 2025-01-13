@@ -1,16 +1,43 @@
 <tr class="govuk-table__row" id="topic-{{ topic.id }}" hx-target="this" hx-swap="outerHTML">
-
+    {% if edit_mode %}
+    <td class="govuk-table__cell">
+        <form hx-put="/topics/{{ topic.id }}" hx-trigger="submit">
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="topic-name-{{ topic.id }}">
+                    Topic Name
+                </label>
+                <input class="govuk-input" id="topic-name-{{ topic.id }}" name="topic_name" 
+                       type="text" value="{{ topic.topic_name }}" required>
+            </div>
+            
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="topic-description-{{ topic.id }}">
+                    Description
+                </label>
+                <textarea class="govuk-textarea" id="topic-description-{{ topic.id }}" 
+                          name="topic_description" rows="3" required>{{ topic.topic_description }}</textarea>
+            </div>
+            
+            <button type="submit" class="govuk-button">Save</button>
+            <button type="button" class="govuk-button govuk-button--secondary" 
+                    hx-get="/topics/{{ topic.id }}">Cancel</button>
+        </form>
+    </td>
+    {% else %}
     <td class="govuk-table__cell">
         <a href="" class="govuk-link">{{ topic.topic_name }}</a>
-        <p class="govuk-body">{{topic.topic_description}}</p>
+        <p class="govuk-body">{{ topic.topic_description }}</p>
     </td>
+    {% endif %}
 
     <td class="govuk-table__cell">
-        <button hx-get="/topics/{{ topic.id }}/edit" class="govuk-button govuk-button--secondary">Edit</button>
+        {% if not edit_mode %}
+        <button hx-get="/topics/{{ topic.id }}/edit" 
+                class="govuk-button govuk-button--secondary">Edit</button>
         <br>
-        <button hx-delete="/topics/{{ topic.id }}" hx-target="#topics-tab" hx-swap="outerHTML"
-            class="govuk-button govuk-button--warning">Delete</button>
+        {% endif %}
+        <button hx-delete="/topics/{{ topic.id }}" 
+                hx-confirm="Are you sure you want to delete this topic?"
+                class="govuk-button govuk-button--warning">Delete</button>
     </td>
-
-
 </tr>
