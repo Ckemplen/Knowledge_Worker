@@ -36,10 +36,18 @@
                 class="govuk-button govuk-button--secondary">Edit</button>
         <br>
         {% endif %}
-        <button hx-delete="/topics/{{ topic.id }}" 
-                hx-confirm="Are you sure you want to delete the topic '{{ topic.topic_name }}'?"
-                class="govuk-button govuk-button--warning"
-                hx-indicator="#loading-delete-{{ topic.id }}">
+        <button onclick="showDeleteConfirmation('Topic: {{ topic.topic_name }}', () => {
+                htmx.trigger(this, 'confirmed-delete');
+            })"
+            class="govuk-button govuk-button--warning"
+            hx-indicator="#loading-delete-{{ topic.id }}">
+            Delete
+            <span id="loading-delete-{{ topic.id }}" class="htmx-indicator govuk-visually-hidden">
+                Deleting...
+            </span>
+        </button>
+        <div hx-delete="/topics/{{ topic.id }}" 
+             hx-trigger="confirmed-delete"></div>
             Delete
             <span id="loading-delete-{{ topic.id }}" class="htmx-indicator govuk-visually-hidden">
                 Deleting...

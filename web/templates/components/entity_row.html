@@ -16,13 +16,21 @@
                     Loading...
                 </span>
             </button>
-            <button hx-delete="/entities/{{ entity.id }}" 
-                    hx-target="#entities-tab" 
-                    hx-swap="outerHTML"
-                    class="govuk-button govuk-button--warning"
-                    aria-label="Delete {{ entity.entity_name }}"
-                    hx-confirm="Are you sure you want to delete the entity '{{ entity.entity_name }}'?"
-                    hx-indicator="#loading-delete-{{ entity.id }}">
+            <button onclick="showDeleteConfirmation('Entity: {{ entity.entity_name }}', () => {
+                    htmx.trigger(this, 'confirmed-delete');
+                })"
+                class="govuk-button govuk-button--warning"
+                aria-label="Delete {{ entity.entity_name }}"
+                hx-indicator="#loading-delete-{{ entity.id }}">
+                Delete
+                <span id="loading-delete-{{ entity.id }}" class="htmx-indicator govuk-visually-hidden">
+                    Deleting...
+                </span>
+            </button>
+            <div hx-delete="/entities/{{ entity.id }}" 
+                 hx-target="#entities-tab" 
+                 hx-swap="outerHTML"
+                 hx-trigger="confirmed-delete"></div>
                 Delete
                 <span id="loading-delete-{{ entity.id }}" class="htmx-indicator govuk-visually-hidden">
                     Deleting...

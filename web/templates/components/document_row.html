@@ -19,7 +19,7 @@
                     Loading...
                 </span>
             </button>
-            <button onclick="showDeleteConfirmation('{{ document.filename }}', () => {
+            <button onclick="showDeleteConfirmation('Document: {{ document.filename }}', () => {
                     htmx.trigger(this, 'confirmed-delete');
                 })"
                 class="govuk-button govuk-button--warning"
