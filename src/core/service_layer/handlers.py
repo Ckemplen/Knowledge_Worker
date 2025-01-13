@@ -6,6 +6,7 @@ from core.domain.model import (
     EntityRawEntity,
     DocumentEntity,
     Stakeholder,
+    Topic,
 )
 import core.domain.error_messages
 import core.service_layer.unit_of_work as uow
