@@ -6,9 +6,20 @@
     </td>
 
     <td class="govuk-table__cell">
-        <button hx-get="/stakeholders/{{ stakeholder.id }}/edit" class="govuk-button govuk-button--secondary">Edit</button>
-        <br>
-        <button hx-delete="/stakeholders/{{ stakeholder.id }}" hx-target="#stakeholders-tab" hx-swap="outerHTML" class="govuk-button govuk-button--warning">Delete</button>
+        <div class="govuk-button-group">
+            <button hx-get="/stakeholders/{{ stakeholder.id }}/edit" 
+                    class="govuk-button govuk-button--secondary"
+                    aria-label="Edit {{ stakeholder.stakeholder_name }}">
+                Edit
+            </button>
+            <button hx-delete="/stakeholders/{{ stakeholder.id }}" 
+                    hx-target="#stakeholders-tab" 
+                    hx-swap="outerHTML" 
+                    class="govuk-button govuk-button--warning"
+                    aria-label="Delete {{ stakeholder.stakeholder_name }}">
+                Delete
+            </button>
+        </div>
     </td>
 
 

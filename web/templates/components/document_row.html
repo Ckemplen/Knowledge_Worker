@@ -9,10 +9,20 @@
 
 
     <td class="govuk-table__cell">
-        <button hx-get="/documents/{{ document.id }}/edit" class="govuk-button govuk-button--secondary">Edit</button>
-        <br>
-        <button hx-delete="/documents/{{ document.id }}" hx-target="#entities-tab" hx-swap="outerHTML"
-            class="govuk-button govuk-button--warning">Delete</button>
+        <div class="govuk-button-group">
+            <button hx-get="/documents/{{ document.id }}/edit" 
+                    class="govuk-button govuk-button--secondary"
+                    aria-label="Edit {{ document.filename }}">
+                Edit
+            </button>
+            <button hx-delete="/documents/{{ document.id }}" 
+                    hx-target="#entities-tab" 
+                    hx-swap="outerHTML"
+                    class="govuk-button govuk-button--warning"
+                    aria-label="Delete {{ document.filename }}">
+                Delete
+            </button>
+        </div>
     </td>
 
 </tr>
