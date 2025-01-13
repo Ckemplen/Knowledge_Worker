@@ -30,7 +30,8 @@ class CreateDocument(Command):
 class ProcessDocument(Command):
     document_id: int
 
-@dataclass 
+
+@dataclass
 class UpdateDocumentSummary(Command):
     id: int
     summary: str

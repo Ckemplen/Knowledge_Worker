@@ -14,7 +14,7 @@ DEFAULT_SESSION_FACTORY = sessionmaker(
     #     "sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite",  # echo=config.DB_ECHO
     # )
     bind=create_engine(
-        f"sqlite:///{core.config.DATABASE_PATH}", # echo=config.DB_ECHO
+        f"sqlite:///{core.config.DATABASE_PATH}",  # echo=config.DB_ECHO
     )
 )
 

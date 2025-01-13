@@ -1,5 +1,6 @@
 from core.adapters import llm_connectors
-from core.service_layer import messagebus, unit_of_work
+from core.service_layer import unit_of_work
+from core import bootstrap
 
 
 def get_bus():
@@ -8,4 +9,3 @@ def get_bus():
         document_analysis_connector=llm_connectors.DocumentAnalysisConnector(),
         canonical_entity_consolidation_connector=llm_connectors.CanonicalEntityConsolidationConnector(),
     )
-    

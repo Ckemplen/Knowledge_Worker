@@ -37,7 +37,7 @@ class Document(BaseModel):
     document_topics: Optional[List["DocumentTopic"]] = []
     raw_entities: Optional[List["RawEntity"]] = []
     document_entities: Optional[List["DocumentEntity"]] = []
-    entities: Optional[List['Entity']] = []
+    entities: Optional[List["Entity"]] = []
     events: Optional[List] = []
 
     def compose_DocumentCreated_event(self, doc_comments) -> None:
@@ -145,7 +145,7 @@ class Entity(BaseModel):
     id: int
     entity_name: str
     entity_description: str
-    documents: Optional[List['Document']] = []
+    documents: Optional[List["Document"]] = []
     # document_entities: Optional[List['DocumentEntity']] = []
     # raw_entities: Optional[List['EntityRawEntity']] = []
     events: Optional[List] = []

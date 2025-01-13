@@ -147,7 +147,9 @@ class SqlAlchemyDocumentRepository(AbstractRepository):
         links = self.session.query(orm.DocumentEntityORM).all()
 
         # Create a dictionary to map entity IDs to their Pydantic models
-        entity_dict = {e.id: model.Entity.model_validate(e.to_dict()) for e in entity_objs}
+        entity_dict = {
+            e.id: model.Entity.model_validate(e.to_dict()) for e in entity_objs
+        }
 
         documents = []
         for d in document_objs:
@@ -302,7 +304,9 @@ class SqlAlchemyEntitiesRepository(AbstractRepository):
         document_objs = self.session.query(orm.DocumentORM).all()
         links = self.session.query(orm.DocumentEntityORM).all()
 
-        pydantic_entities = [model.Entity.model_validate(e.to_dict()) for e in entity_objs]
+        pydantic_entities = [
+            model.Entity.model_validate(e.to_dict()) for e in entity_objs
+        ]
 
         document_dict = {}
         for d in document_objs:

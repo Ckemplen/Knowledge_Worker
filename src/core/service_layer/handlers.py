@@ -349,8 +349,7 @@ def update_entity(cmd: commands.UpdateEntity, uow: uow.AbstractUnitOfWork):
         try:
             updated_entity = Entity(**asdict(cmd))
             uow.entities.update(
-                updated_obj=update_entity,
-                fields=['entity_name', 'entity_description']
+                updated_obj=updated_entity, fields=["entity_name", "entity_description"]
             )
         except Exception as e:
             print("Error occured updating stakeholder.")
@@ -359,23 +358,24 @@ def update_entity(cmd: commands.UpdateEntity, uow: uow.AbstractUnitOfWork):
         finally:
             uow.commit()
 
-def update_document_summary(cmd: commands.UpdateDocumentSummary, uow: uow.AbstractUnitOfWork):
+
+def update_document_summary(
+    cmd: commands.UpdateDocumentSummary, uow: uow.AbstractUnitOfWork
+):
     with uow:
         try:
             current_doc = uow.documents.get(reference=id)
             update_dict = current_doc.to_dict()
-            update_dict['summary'] = cmd.summary
+            update_dict["summary"] = cmd.summary
             updated_doc = Document(**update_dict)
-            uow.entities.update(
-                updated_obj=updated_doc,
-                fields=['summary']
-            )
+            uow.entities.update(updated_obj=updated_doc, fields=["summary"])
         except Exception as e:
             print("Error occured updating document.")
             print(e)
             uow.rollback()
         finally:
             uow.commit()
+
 
 EVENT_HANDLERS = {
     events.DocumentCreated: [
@@ -397,7 +397,10 @@ COMMAND_HANDLERS = {
     commands.AddStakeholder: ("add_stakeholder", add_stakeholder),
     commands.UpdateStakeholder: ("update_stakeholder", update_stakeholder),
     commands.UpdateEntity: ("update_entity", update_entity),
-    commands.UpdateDocumentSummary: ("update_document_summary", update_document_summary),
+    commands.UpdateDocumentSummary: (
+        "update_document_summary",
+        update_document_summary,
+    ),
     commands.CreateDocument: ("add_new_document", add_new_document),
     commands.ConsolidateCanonicalEntities: (
         "consolidate_canonical_entities",

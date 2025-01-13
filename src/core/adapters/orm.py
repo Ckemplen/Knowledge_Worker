@@ -211,8 +211,8 @@ DocumentORM.document_entities = relationship(
 
 
 engine = create_engine(f"sqlite:///{core.config.DATABASE_PATH}")
-#engine = create_engine("sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite")
-#engine = create_engine("sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite")
+# engine = create_engine("sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite")
+# engine = create_engine("sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite")
 
 metadata.create_all(engine)
 

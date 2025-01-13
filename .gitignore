@@ -30,3 +30,4 @@ test_inputs
 filelist.txt
 breadboard.ipynb
 uploaded_documents
+.aider*

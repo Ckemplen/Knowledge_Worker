@@ -1,22 +1,14 @@
-from fastapi import FastAPI, Request, Depends, UploadFile, HTTPException, status, Form, APIRouter
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Request, Depends
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from core import bootstrap, views
-from core.adapters import llm_connectors
-from core.service_layer import messagebus, unit_of_work
-from core.domain import commands
+from core import views
+from core.service_layer import messagebus
 
 from .routers import documents, stakeholders, entities, graphs, topics
 from .dependenicies import get_bus
 
-from typing import Dict, Union, List, Any
-
-import pypdf as PyPDF2
-import os
-import shutil
-from pathlib import Path
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="web/static"), name="static")

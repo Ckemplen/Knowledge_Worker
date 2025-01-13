@@ -1,6 +1,6 @@
 from core.service_layer import unit_of_work
+from core.domain import model
 from sqlalchemy import text
-import core.domain.model
 
 
 def get_all_documents(uow: unit_of_work.SqlAlchemyUnitOfWork):
@@ -29,15 +29,18 @@ def get_all_entities(uow: unit_of_work.SqlAlchemyUnitOfWork):
 
     return results
 
+
 def get_entity_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
     with uow:
         result = uow.entities.get(reference=id)
     return result
 
+
 def get_topic_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
     with uow:
         result = uow.topics.get(reference=id)
     return result
+
 
 def get_document_by_filename(uow: unit_of_work.SqlAlchemyUnitOfWork, filename: str):
     with uow:
@@ -52,22 +55,26 @@ def get_document_by_filename(uow: unit_of_work.SqlAlchemyUnitOfWork, filename: s
                 {"filename": filename},
             )
         ).fetchone()
-    return domain.model.Document(result) if result else None
+    return model.Document(result) if result else None
+
 
 def get_document_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
     with uow:
         result = uow.documents.get(reference=id)
     return result
 
+
 def get_stakeholder_by_name(uow: unit_of_work.SqlAlchemyUnitOfWork, name: str):
     with uow:
         result = uow.stakeholders.get_stakeholder_by_name(name=name)
     return result
 
+
 def get_stakeholder_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
     with uow:
         result = uow.stakeholders.get(reference=id)
     return result
+
 
 def get_entity_documents(uow: unit_of_work.SqlAlchemyUnitOfWork):
     entity_documents = {}
