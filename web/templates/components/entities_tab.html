@@ -26,4 +26,18 @@
 
     </table>
 
+    <form hx-post="/entities" 
+    hx-target="#entities" 
+    hx-swap="beforeend" 
+    hx-on::after-request="if(event.detail.successful) this.reset()">
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="entity_name">Name</label>
+            <input class="govuk-input" id="entity_name" name="entity_name" type="text">
+        </div>
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="entity_description">Description</label>
+            <textarea class="govuk-textarea" id="entity_description" name="entity_description" rows="3"></textarea>
+        </div>
+        <button class="govuk-button" type="submit">Add Entity</button>
+    </form>
 </div>
