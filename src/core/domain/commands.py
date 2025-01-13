@@ -63,3 +63,18 @@ class UpdateEntity(Command):
     id: int
     entity_name: str
     entity_description: str
+
+@dataclass
+class CreateTopic(Command):
+    topic_name: str
+    topic_description: str
+
+@dataclass 
+class UpdateTopic(Command):
+    id: int
+    topic_name: str
+    topic_description: str
+
+@dataclass
+class DeleteTopic(Command):
+    id: int

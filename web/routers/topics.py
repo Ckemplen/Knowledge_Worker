@@ -52,3 +52,43 @@ async def get_topic_row_edit_form(
         },
         status_code=200,
     )
+
+@router.post("/", response_class=HTMLResponse)
+async def create_topic(
+    request: Request,
+    topic_name: str,
+    topic_description: str,
+    bus: messagebus.MessageBus = Depends(get_bus)
+):
+    cmd = commands.CreateTopic(
+        topic_name=topic_name,
+        topic_description=topic_description
+    )
+    bus.handle(cmd)
+    return RedirectResponse(url="/", status_code=303)
+
+@router.put("/{topic_id}", response_class=HTMLResponse) 
+async def update_topic(
+    request: Request,
+    topic_id: int,
+    topic_name: str,
+    topic_description: str,
+    bus: messagebus.MessageBus = Depends(get_bus)
+):
+    cmd = commands.UpdateTopic(
+        id=topic_id,
+        topic_name=topic_name,
+        topic_description=topic_description
+    )
+    bus.handle(cmd)
+    return RedirectResponse(url="/", status_code=303)
+
+@router.delete("/{topic_id}", response_class=HTMLResponse)
+async def delete_topic(
+    request: Request,
+    topic_id: int,
+    bus: messagebus.MessageBus = Depends(get_bus)
+):
+    cmd = commands.DeleteTopic(id=topic_id)
+    bus.handle(cmd)
+    return RedirectResponse(url="/", status_code=303)

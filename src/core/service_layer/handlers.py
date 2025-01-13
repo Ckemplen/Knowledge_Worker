@@ -376,6 +376,46 @@ def update_document_summary(
         finally:
             uow.commit()
 
+def create_topic(cmd: commands.CreateTopic, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            topic = uow.topics.add({
+                "topic_name": cmd.topic_name,
+                "topic_description": cmd.topic_description
+            })
+        except Exception as e:
+            print("Error creating topic")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
+def update_topic(cmd: commands.UpdateTopic, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            topic = Topic(
+                id=cmd.id,
+                topic_name=cmd.topic_name,
+                topic_description=cmd.topic_description
+            )
+            uow.topics.update(topic, ["topic_name", "topic_description"])
+        except Exception as e:
+            print("Error updating topic")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
+def delete_topic(cmd: commands.DeleteTopic, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            uow.topics.delete(cmd.id)
+        except Exception as e:
+            print("Error deleting topic")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
 
 EVENT_HANDLERS = {
     events.DocumentCreated: [
@@ -406,4 +446,7 @@ COMMAND_HANDLERS = {
         "consolidate_canonical_entities",
         consolidate_canonical_entities,
     ),
+    commands.CreateTopic: ("create_topic", create_topic),
+    commands.UpdateTopic: ("update_topic", update_topic),
+    commands.DeleteTopic: ("delete_topic", delete_topic),
 }

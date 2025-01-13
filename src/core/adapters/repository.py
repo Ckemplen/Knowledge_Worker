@@ -260,6 +260,22 @@ class SqlAlchemyTopicsRepository(AbstractRepository):
         _topic_objs = self.session.query(orm.TopicORM).all()
         return [model.Topic.model_validate(r_t) for r_t in _topic_objs]
 
+    def _update(self, updated_obj: model.Topic, fields: List[str]):
+        topic_obj = self.session.query(orm.TopicORM).filter_by(id=updated_obj.id).one()
+        
+        for key, value in dict(updated_obj).items():
+            if key not in fields:
+                continue
+            setattr(topic_obj, key, value)
+            
+        self.session.commit()
+        return updated_obj
+
+    def delete(self, id: int):
+        topic_obj = self.session.query(orm.TopicORM).filter_by(id=id).one()
+        self.session.delete(topic_obj)
+        self.session.commit()
+
 
 class SqlAlchemyEntitiesRepository(AbstractRepository):
     def __init__(self, session):
