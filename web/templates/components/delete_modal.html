@@ -1,12 +1,8 @@
-<div id="delete-confirmation" hidden>
-    <!-- This will be populated by JavaScript -->
-</div>
-
 <script>
     function showDeleteConfirmation(itemName, deleteCallback) {
         modal.show(
             'Delete Confirmation',
-            `Are you sure you want to delete "${itemName}"?`,
+            `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
             [
                 {
                     text: 'Delete',
