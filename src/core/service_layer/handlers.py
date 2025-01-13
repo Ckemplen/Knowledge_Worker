@@ -1,5 +1,6 @@
 import core.domain.commands as commands
 import core.domain.events as events
+from core.domain.model import Topic
 from core.domain.model import (
     Document,
     Entity,
