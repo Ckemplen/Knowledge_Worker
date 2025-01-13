@@ -88,6 +88,15 @@ async def update_stakeholder(
 async def delete_stakeholder(
     request: Request, stakeholder_id: int, bus: messagebus.MessageBus = Depends(get_bus)
 ):
-    cmd = commands.DeleteStakeholder(id=stakeholder_id)
-    bus.handle(message=cmd)
-    return HTMLResponse(status_code=204)  # No content
+    try:
+        cmd = commands.DeleteStakeholder(id=stakeholder_id)
+        bus.handle(message=cmd)
+        # Return empty response which HTMX will remove
+        return HTMLResponse("", status_code=200)
+    except Exception as e:
+        # Return error message that will be shown to user
+        return templates.TemplateResponse(
+            "components/error_message.html",
+            {"request": request, "error_message": f"Failed to delete stakeholder: {str(e)}"},
+            status_code=500
+        )
