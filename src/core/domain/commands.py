@@ -78,3 +78,7 @@ class UpdateTopic(Command):
 @dataclass
 class DeleteTopic(Command):
     id: int
+
+@dataclass
+class DeleteStakeholder(Command):
+    id: int

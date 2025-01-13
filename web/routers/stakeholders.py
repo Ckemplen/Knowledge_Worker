@@ -83,3 +83,11 @@ async def update_stakeholder(
         {"request": request, "stakeholder": new_stakeholder},
         status_code=200,  # Updated successfully
     )
+
+@router.delete("/{stakeholder_id}", response_class=HTMLResponse)
+async def delete_stakeholder(
+    request: Request, stakeholder_id: int, bus: messagebus.MessageBus = Depends(get_bus)
+):
+    cmd = commands.DeleteStakeholder(id=stakeholder_id)
+    bus.handle(message=cmd)
+    return HTMLResponse(status_code=204)  # No content

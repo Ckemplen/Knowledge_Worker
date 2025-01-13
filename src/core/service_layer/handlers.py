@@ -419,6 +419,17 @@ def delete_topic(cmd: commands.DeleteTopic, uow: uow.AbstractUnitOfWork):
         finally:
             uow.commit()
 
+def delete_stakeholder(cmd: commands.DeleteStakeholder, uow: uow.AbstractUnitOfWork):
+    with uow:
+        try:
+            uow.stakeholders.delete(cmd.id)
+        except Exception as e:
+            print("Error deleting stakeholder")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
 EVENT_HANDLERS = {
     events.DocumentCreated: [
         ("add_document_comments", add_document_comments),
@@ -451,4 +462,5 @@ COMMAND_HANDLERS = {
     commands.CreateTopic: ("create_topic", create_topic),
     commands.UpdateTopic: ("update_topic", update_topic),
     commands.DeleteTopic: ("delete_topic", delete_topic),
+    commands.DeleteStakeholder: ("delete_stakeholder", delete_stakeholder),
 }

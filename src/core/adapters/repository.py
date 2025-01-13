@@ -398,3 +398,8 @@ class SqlAlchemyStakeholderRepository(AbstractRepository):
         self.session.commit()
 
         return updated_obj
+
+    def delete(self, id: int):
+        stakeholder_obj = self.session.query(orm.StakeholderORM).filter_by(id=id).one()
+        self.session.delete(stakeholder_obj)
+        self.session.commit()
