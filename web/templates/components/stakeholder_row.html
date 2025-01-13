@@ -16,21 +16,18 @@
                     Loading...
                 </span>
             </button>
-            <button onclick="showDeleteConfirmation('Stakeholder: {{ stakeholder.stakeholder_name }}', () => {
-                    htmx.trigger(this, 'confirmed-delete');
-                })"
-                class="govuk-button govuk-button--warning"
-                aria-label="Delete {{ stakeholder.stakeholder_name }}"
-                hx-indicator="#loading-delete-{{ stakeholder.id }}">
+            <button class="govuk-button govuk-button--warning"
+                    aria-label="Delete {{ stakeholder.stakeholder_name }}"
+                    hx-delete="/stakeholders/{{ stakeholder.id }}"
+                    hx-target="#stakeholders-tab"
+                    hx-swap="outerHTML"
+                    hx-confirm="Are you sure you want to delete '{{ stakeholder.stakeholder_name }}'?"
+                    hx-indicator="#loading-delete-{{ stakeholder.id }}">
                 Delete
                 <span id="loading-delete-{{ stakeholder.id }}" class="htmx-indicator govuk-visually-hidden">
                     Deleting...
                 </span>
             </button>
-            <div hx-delete="/stakeholders/{{ stakeholder.id }}" 
-                 hx-target="#stakeholders-tab" 
-                 hx-swap="outerHTML"
-                 hx-trigger="confirmed-delete"></div>
         </div>
     </td>
 
