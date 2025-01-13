@@ -24,7 +24,7 @@
                     hx-swap="outerHTML"
                     class="govuk-button govuk-button--warning"
                     aria-label="Delete {{ document.filename }}"
-                    hx-confirm="Are you sure you want to delete this document?"
+                    hx-confirm="Are you sure you want to delete the document '{{ document.filename }}'?"
                     hx-indicator="#loading-delete-{{ document.id }}">
                 Delete
                 <span id="loading-delete-{{ document.id }}" class="htmx-indicator govuk-visually-hidden">

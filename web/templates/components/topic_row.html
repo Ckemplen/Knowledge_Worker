@@ -37,7 +37,13 @@
         <br>
         {% endif %}
         <button hx-delete="/topics/{{ topic.id }}" 
-                hx-confirm="Are you sure you want to delete this topic?"
-                class="govuk-button govuk-button--warning">Delete</button>
+                hx-confirm="Are you sure you want to delete the topic '{{ topic.topic_name }}'?"
+                class="govuk-button govuk-button--warning"
+                hx-indicator="#loading-delete-{{ topic.id }}">
+            Delete
+            <span id="loading-delete-{{ topic.id }}" class="htmx-indicator govuk-visually-hidden">
+                Deleting...
+            </span>
+        </button>
     </td>
 </tr>

@@ -21,7 +21,7 @@
                     hx-swap="outerHTML" 
                     class="govuk-button govuk-button--warning"
                     aria-label="Delete {{ stakeholder.stakeholder_name }}"
-                    hx-confirm="Are you sure you want to delete this stakeholder?"
+                    hx-confirm="Are you sure you want to delete the stakeholder '{{ stakeholder.stakeholder_name }}'?"
                     hx-indicator="#loading-delete-{{ stakeholder.id }}">
                 Delete
                 <span id="loading-delete-{{ stakeholder.id }}" class="htmx-indicator govuk-visually-hidden">
