@@ -26,7 +26,9 @@ async def add_stakeholder(
 ):
     form_data = await request.form()
     cmd = commands.AddStakeholder(
-        form_data["stakeholder_name"], form_data["stakeholder_type"]
+        form_data["stakeholder_name"],
+        form_data["stakeholder_type"],
+        form_data["stakeholder_description"]
     )
     bus.handle(message=cmd)
     new_stakeholder = views.get_stakeholder_by_name(
@@ -73,6 +75,7 @@ async def update_stakeholder(
         id=stakeholder_id,
         stakeholder_name=form_data["stakeholder_name"],
         stakeholder_type=form_data["stakeholder_type"],
+        stakeholder_description=form_data["stakeholder_description"]
     )
     bus.handle(message=cmd)
     new_stakeholder = views.get_stakeholder_by_name(

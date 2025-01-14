@@ -1,7 +1,11 @@
 <tr class="govuk-table__row" id="stakeholder-{{ stakeholder.id }}" hx-target="this" hx-swap="outerHTML">
 
     <td class="govuk-table__cell">
-        <a href="" class="govuk-link">{{ stakeholder.stakeholder_name }}</a> <br> <i class="govuk-body-small">{{stakeholder.stakeholder_type}}</i>
+        <a href="" class="govuk-link">{{ stakeholder.stakeholder_name }}</a> <br> 
+        <i class="govuk-body-small">{{stakeholder.stakeholder_type}}</i>
+        {% if stakeholder.stakeholder_description %}
+            <p class="govuk-body govuk-!-margin-top-2">{{ stakeholder.stakeholder_description }}</p>
+        {% endif %}
  
     </td>
 

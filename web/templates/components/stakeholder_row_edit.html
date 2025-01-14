@@ -9,6 +9,10 @@
             <input class="govuk-input" type="text" name="stakeholder_type" value="{{stakeholder.stakeholder_type}}">
             <br>
             <br>
+            <label class="govuk-label">Description</label>
+            <textarea class="govuk-textarea" name="stakeholder_description" rows="3">{{ stakeholder.stakeholder_description }}</textarea>
+            <br>
+            <br>
             <button type="submit" class="govuk-button">Submit</button>
             <button hx-get="/stakeholders/{{ stakeholder.id }}" class="govuk-button govuk-button--secondary">
                 Cancel
