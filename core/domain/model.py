@@ -156,7 +156,14 @@ class Stakeholder(BaseDomainModel):
     stakeholder_description: str
 
     def __hash__(self):
-        return hash((self.id, self.stakeholder_name, self.stakeholder_type, self.stakeholder_description))
+        return hash(
+            (
+                self.id,
+                self.stakeholder_name,
+                self.stakeholder_type,
+                self.stakeholder_description,
+            )
+        )
 
 
 @dataclass

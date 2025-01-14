@@ -18,6 +18,8 @@ __pycache__
 # Local db / secrets
 .env
 db.sqlite
+alembic
+alembic.ini
 
 # Test inputs/data
 seed_canonical_topics.json

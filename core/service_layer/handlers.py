@@ -378,13 +378,17 @@ def update_document_summary(
         finally:
             uow.commit()
 
+
 def create_topic(cmd: commands.CreateTopic, uow: uow.AbstractUnitOfWork):
     with uow:
         try:
-            topic = uow.topics.add({
-                "topic_name": cmd.topic_name,
-                "topic_description": cmd.topic_description
-            })
+            topic: Topic = uow.topics.add(
+                {
+                    "topic_name": cmd.topic_name,
+                    "topic_description": cmd.topic_description,
+                }
+            )
+            print("New topic added: ", topic)
         except Exception as e:
             print("Error creating topic")
             print(e)
@@ -392,13 +396,14 @@ def create_topic(cmd: commands.CreateTopic, uow: uow.AbstractUnitOfWork):
         finally:
             uow.commit()
 
+
 def update_topic(cmd: commands.UpdateTopic, uow: uow.AbstractUnitOfWork):
     with uow:
         try:
             topic = Topic(
                 id=cmd.id,
                 topic_name=cmd.topic_name,
-                topic_description=cmd.topic_description
+                topic_description=cmd.topic_description,
             )
             uow.topics.update(topic, ["topic_name", "topic_description"])
         except Exception as e:
@@ -407,6 +412,7 @@ def update_topic(cmd: commands.UpdateTopic, uow: uow.AbstractUnitOfWork):
             uow.rollback()
         finally:
             uow.commit()
+
 
 def delete_topic(cmd: commands.DeleteTopic, uow: uow.AbstractUnitOfWork):
     with uow:
@@ -419,6 +425,7 @@ def delete_topic(cmd: commands.DeleteTopic, uow: uow.AbstractUnitOfWork):
         finally:
             uow.commit()
 
+
 def delete_stakeholder(cmd: commands.DeleteStakeholder, uow: uow.AbstractUnitOfWork):
     with uow:
         try:
@@ -429,6 +436,7 @@ def delete_stakeholder(cmd: commands.DeleteStakeholder, uow: uow.AbstractUnitOfW
             uow.rollback()
         finally:
             uow.commit()
+
 
 EVENT_HANDLERS = {
     events.DocumentCreated: [

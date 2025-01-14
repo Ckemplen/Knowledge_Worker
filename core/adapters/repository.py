@@ -262,12 +262,12 @@ class SqlAlchemyTopicsRepository(AbstractRepository):
 
     def _update(self, updated_obj: model.Topic, fields: List[str]):
         topic_obj = self.session.query(orm.TopicORM).filter_by(id=updated_obj.id).one()
-        
+
         for key, value in dict(updated_obj).items():
             if key not in fields:
                 continue
             setattr(topic_obj, key, value)
-            
+
         self.session.commit()
         return updated_obj
 

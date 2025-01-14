@@ -1,22 +1,28 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, fields
 from typing import Optional, List, Tuple, Union
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Command:
     pass
 
+class CommandModifiedAudit(Command):
+    def __init__(self, last_modified_by="ADMIN", last_modified_at=None):
+        self.last_modified_by = last_modified_by
+        self.last_modified_at = last_modified_at or datetime.now(tz=timezone.utc)
+
+class CommandCreatedAudit(CommandModifiedAudit):
+    def __init__(self, created_by="ADMIN", created_at=None, **kwargs):
+        super().__init__(**kwargs)
+        self.created_by = created_by
+        self.created_at = created_at or datetime.now(tz=timezone.utc)
 
 @dataclass
-class CreateDocument(Command):
+class CreateDocument(CommandCreatedAudit):  
     filepath: str
     filename: str
     text: str
-    created_by: str
-    last_modified_by: str
-    last_modified_at: datetime = datetime.now()
-    created_at: datetime = datetime.now()
-    processed_at: datetime = datetime.now()
+    processed_at: datetime = datetime.now(tz=timezone.utc)
     doc_comments: Optional[List[Tuple]] = None
     revision: Optional[int] = 0
     filetype: Optional[str] = None
@@ -27,12 +33,12 @@ class CreateDocument(Command):
 
 
 @dataclass
-class ProcessDocument(Command):
+class ProcessDocument(CommandModifiedAudit):
     document_id: int
 
 
 @dataclass
-class UpdateDocumentSummary(Command):
+class UpdateDocumentSummary(CommandModifiedAudit):
     id: int
     summary: str
 
@@ -46,14 +52,14 @@ class ConsolidateCanonicalEntities(Command):
 
 
 @dataclass
-class AddStakeholder(Command):
+class AddStakeholder(CommandCreatedAudit):
     stakeholder_name: str
     stakeholder_type: str
     stakeholder_description: str
 
 
 @dataclass
-class UpdateStakeholder(Command):
+class UpdateStakeholder(CommandModifiedAudit):
     id: int
     stakeholder_name: str
     stakeholder_type: str
@@ -61,30 +67,30 @@ class UpdateStakeholder(Command):
 
 
 @dataclass
-class UpdateEntity(Command):
+class UpdateEntity(CommandModifiedAudit):
     id: int
     entity_name: str
     entity_description: str
 
 
 @dataclass
-class CreateTopic(Command):
+class CreateTopic(CommandCreatedAudit):
     topic_name: str
     topic_description: str
 
 
 @dataclass
-class UpdateTopic(Command):
+class UpdateTopic(CommandModifiedAudit):
     id: int
     topic_name: str
     topic_description: str
 
 
 @dataclass
-class DeleteTopic(Command):
+class DeleteTopic(CommandModifiedAudit):
     id: int
 
 
 @dataclass
-class DeleteStakeholder(Command):
+class DeleteStakeholder(CommandModifiedAudit):
     id: int

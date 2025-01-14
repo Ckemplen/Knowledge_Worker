@@ -7,12 +7,7 @@ import core.config
 Base = declarative_base()
 
 engine = create_engine(f"sqlite:///{core.config.DATABASE_PATH}", echo=True)
-# engine = create_engine(
-#     "sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite", echo=True
-# )
-# engine = create_engine(
-#     "sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite", echo=True
-# )
+
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
@@ -149,5 +144,4 @@ def create_database(db_path):
 
 
 if __name__ == "__main__":
-    create_database("C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite")
-    # create_database("C:/Users/chris/OneDrive/KNOWLEDGE-WORKER/Knowledge_Worker/db.sqlite")
+    create_database(core.config.DATABASE_PATH)

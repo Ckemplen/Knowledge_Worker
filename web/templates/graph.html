@@ -722,7 +722,7 @@
     // --- HTMX Integration ---
     htmx.onLoad(() => {
         console.log('HTMX loaded');
-        fetch('/graph_data')
+        fetch('/graphs/node_edge_graph_data')
             .then(response => response.json())
             .then(data => {
                 createGraph(data);

@@ -79,22 +79,6 @@ class TopicORM(BaseAudit):
     raw_topics = relationship("TopicRawTopicORM", back_populates="topic")
 
 
-class DocumentTopicORM(BaseAudit):
-    __tablename__ = "DocumentTopics"
-    document_id = Column(Integer, ForeignKey("Documents.id"), primary_key=True)
-    topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
-    document = relationship("DocumentORM", back_populates="document_topics")
-    topic = relationship("TopicORM", back_populates="document_topics")
-
-
-class TopicRawTopicORM(BaseAudit):
-    __tablename__ = "TopicsRawTopics"
-    topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
-    raw_topic_id = Column(Integer, ForeignKey("RawTopics.id"), primary_key=True)
-    topic = relationship("TopicORM", back_populates="raw_topics")
-    raw_topic = relationship("RawTopicORM", back_populates="topics")
-
-
 class RawEntityORM(BaseAudit):
     __tablename__ = "RawEntities"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -121,6 +105,22 @@ class StakeholderORM(BaseAudit):
     stakeholder_name = Column(String)
     stakeholder_type = Column(String)
     stakeholder_description = Column(String)
+
+
+class DocumentTopicORM(BaseWithToDict):
+    __tablename__ = "DocumentTopics"
+    document_id = Column(Integer, ForeignKey("Documents.id"), primary_key=True)
+    topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
+    document = relationship("DocumentORM", back_populates="document_topics")
+    topic = relationship("TopicORM", back_populates="document_topics")
+
+
+class TopicRawTopicORM(BaseWithToDict):
+    __tablename__ = "TopicsRawTopics"
+    topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
+    raw_topic_id = Column(Integer, ForeignKey("RawTopics.id"), primary_key=True)
+    topic = relationship("TopicORM", back_populates="raw_topics")
+    raw_topic = relationship("RawTopicORM", back_populates="topics")
 
 
 class CommentORM(
