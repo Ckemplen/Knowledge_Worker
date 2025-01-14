@@ -6,11 +6,6 @@ from dataclasses import dataclass
 
 
 class BaseDomainModel(BaseModel):
-    created_at: datetime
-    last_modified_at: datetime
-    created_by: str
-    last_modified_by: str
-    version: int = 1
 
     class Config:
         from_attributes = True
