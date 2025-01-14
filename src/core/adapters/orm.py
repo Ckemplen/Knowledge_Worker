@@ -11,22 +11,35 @@ from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 import datetime
 import core.config
 
-
-class BaseORM(Base):
-    __abstract__ = True
-    
-    created_at = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
-    last_modified_at = Column(DateTime, onupdate=datetime.datetime.now(datetime.timezone.utc))
-    created_by = Column(String)
-    last_modified_by = Column(String)
-    version = Column(Integer, nullable=False, default=1)
-
 metadata = MetaData()
 
 Base = declarative_base()
 
 
-class DocumentORM(BaseORM):
+class BaseWithToDict(Base):
+    __abstract__ = True
+
+    # Adds to_dict method
+    def to_dict(self):
+        return {
+            column.name: getattr(self, column.name) for column in self.__table__.columns
+        }
+
+
+class BaseAudit(BaseWithToDict):
+    __abstract__ = True
+
+    # Adds audit fields to all inheriting models
+    created_at = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    last_modified_at = Column(
+        DateTime, onupdate=datetime.datetime.now(datetime.timezone.utc)
+    )
+    created_by = Column(String)
+    last_modified_by = Column(String)
+    version = Column(Integer, nullable=False, default=1)
+
+
+class DocumentORM(BaseAudit):
     __tablename__ = "Documents"
     id = Column(Integer, primary_key=True, autoincrement=True)
     filepath = Column(String, nullable=False)
@@ -34,12 +47,7 @@ class DocumentORM(BaseORM):
     filetype = Column(String)
     text = Column(String)
     html_text = Column(String)
-    version = Column(Integer, nullable=False, default=1)
     previous_version_id = Column(Integer, ForeignKey("Documents.id"))
-    last_modified_at = Column(DateTime)
-    created_at = Column(DateTime)
-    processed_at = Column(DateTime)
-    created_by = Column(String)
     last_modified_by = Column(String)
     summary = Column(String)
     version_comment = Column(String)
@@ -50,29 +58,8 @@ class DocumentORM(BaseORM):
     )
     next_versions = relationship("DocumentORM", back_populates="previous_version")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class CommentORM(Base):
-    __tablename__ = "Comments"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    document_id = Column(Integer, ForeignKey("Documents.id"), nullable=False)
-    author = Column(String)
-    comment_text = Column(String)
-    reference_text = Column(String)
-    comment_date = Column(DateTime)
-    document = relationship("DocumentORM", back_populates="comments")
-
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
-
-
-class RawTopicORM(Base):
+class RawTopicORM(BaseAudit):
     __tablename__ = "RawTopics"
     id = Column(Integer, primary_key=True, autoincrement=True)
     document_id = Column(Integer, ForeignKey("Documents.id"), nullable=False)
@@ -80,17 +67,10 @@ class RawTopicORM(Base):
     topic_description = Column(String)
     topic_prevalence = Column(Integer)
     document = relationship("DocumentORM", back_populates="raw_topics")
-    topics = relationship(
-        "TopicRawTopicORM", back_populates="raw_topic"
-    )  # Add this line
-
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
+    topics = relationship("TopicRawTopicORM", back_populates="raw_topic")
 
 
-class TopicORM(Base):
+class TopicORM(BaseAudit):
     __tablename__ = "Topics"
     id = Column(Integer, primary_key=True, autoincrement=True)
     topic_name = Column(String)
@@ -98,39 +78,24 @@ class TopicORM(Base):
     document_topics = relationship("DocumentTopicORM", back_populates="topic")
     raw_topics = relationship("TopicRawTopicORM", back_populates="topic")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class DocumentTopicORM(Base):
+class DocumentTopicORM(BaseAudit):
     __tablename__ = "DocumentTopics"
     document_id = Column(Integer, ForeignKey("Documents.id"), primary_key=True)
     topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
     document = relationship("DocumentORM", back_populates="document_topics")
     topic = relationship("TopicORM", back_populates="document_topics")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class TopicRawTopicORM(Base):
+class TopicRawTopicORM(BaseAudit):
     __tablename__ = "TopicsRawTopics"
     topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
     raw_topic_id = Column(Integer, ForeignKey("RawTopics.id"), primary_key=True)
     topic = relationship("TopicORM", back_populates="raw_topics")
     raw_topic = relationship("RawTopicORM", back_populates="topics")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class RawEntityORM(Base):
+class RawEntityORM(BaseAudit):
     __tablename__ = "RawEntities"
     id = Column(Integer, primary_key=True, autoincrement=True)
     document_id = Column(Integer, ForeignKey("Documents.id"), nullable=False)
@@ -140,13 +105,8 @@ class RawEntityORM(Base):
     document = relationship("DocumentORM", back_populates="raw_entities")
     entities = relationship("EntityRawEntityORM", back_populates="raw_entity")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class EntityORM(Base):
+class EntityORM(BaseAudit):
     __tablename__ = "Entities"
     id = Column(Integer, primary_key=True, autoincrement=True)
     entity_name = Column(String)
@@ -154,51 +114,50 @@ class EntityORM(Base):
     document_entities = relationship("DocumentEntityORM", back_populates="entity")
     raw_entities = relationship("EntityRawEntityORM", back_populates="entity")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class StakeholderORM(Base):
+class StakeholderORM(BaseAudit):
     __tablename__ = "Stakeholders"
     id = Column(Integer, primary_key=True, autoincrement=True)
     stakeholder_name = Column(String)
     stakeholder_type = Column(String)
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
+
+class CommentORM(
+    BaseWithToDict
+):  # Not inheriting BaseORM because audit fields not needed
+    __tablename__ = "Comments"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    document_id = Column(Integer, ForeignKey("Documents.id"), nullable=False)
+    author = Column(String)
+    comment_text = Column(String)
+    reference_text = Column(String)
+    comment_date = Column(DateTime)
+    document = relationship("DocumentORM", back_populates="comments")
 
 
-class DocumentEntityORM(Base):
+class DocumentEntityORM(
+    BaseWithToDict
+):  # Not inheriting BaseORM because audit fields not needed
     __tablename__ = "DocumentEntities"
     document_id = Column(Integer, ForeignKey("Documents.id"), primary_key=True)
     entity_id = Column(Integer, ForeignKey("Entities.id"), primary_key=True)
     document = relationship("DocumentORM", back_populates="document_entities")
     entity = relationship("EntityORM", back_populates="document_entities")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class EntityRawEntityORM(Base):
+class EntityRawEntityORM(
+    BaseWithToDict
+):  # Not inheriting BaseORM because audit fields not needed
     __tablename__ = "EntitiesRawEntities"
     entity_id = Column(Integer, ForeignKey("Entities.id"), primary_key=True)
     raw_entity_id = Column(Integer, ForeignKey("RawEntities.id"), primary_key=True)
     entity = relationship("EntityORM", back_populates="raw_entities")
     raw_entity = relationship("RawEntityORM", back_populates="entities")
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name) for column in self.__table__.columns
-        }
 
-
-class ChangelogORM(Base):
+class ChangelogORM(
+    BaseWithToDict
+):  # Not inheriting BaseORM because audit fields not needed
     __tablename__ = "changelogs"
     id = Column(Integer, primary_key=True, autoincrement=True)
     modified_datetime = Column(
@@ -221,8 +180,6 @@ DocumentORM.document_entities = relationship(
 
 
 engine = create_engine(f"sqlite:///{core.config.DATABASE_PATH}")
-# engine = create_engine("sqlite:///C:/Users/chris/Knowledge_Worker/db.sqlite")
-# engine = create_engine("sqlite:///C:/Users/ckemplen/POLICY_DEVELOPMENT_APP/db.sqlite")
 
 metadata.create_all(engine)
 

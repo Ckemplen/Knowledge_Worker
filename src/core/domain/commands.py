@@ -64,20 +64,24 @@ class UpdateEntity(Command):
     entity_name: str
     entity_description: str
 
+
 @dataclass
 class CreateTopic(Command):
     topic_name: str
     topic_description: str
 
-@dataclass 
+
+@dataclass
 class UpdateTopic(Command):
     id: int
     topic_name: str
     topic_description: str
 
+
 @dataclass
 class DeleteTopic(Command):
     id: int
+
 
 @dataclass
 class DeleteStakeholder(Command):
