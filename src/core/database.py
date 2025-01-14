@@ -27,6 +27,7 @@ def create_database(db_path):
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         stakeholder_name TEXT,
         stakeholder_type TEXT,
+        stakeholder_description TEXT,
         UNIQUE (stakeholder_name)
         );
 

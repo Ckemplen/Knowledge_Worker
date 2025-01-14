@@ -120,6 +120,7 @@ class StakeholderORM(BaseAudit):
     id = Column(Integer, primary_key=True, autoincrement=True)
     stakeholder_name = Column(String)
     stakeholder_type = Column(String)
+    stakeholder_description = Column(String)
 
 
 class CommentORM(

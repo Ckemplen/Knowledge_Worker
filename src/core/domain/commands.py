@@ -49,6 +49,7 @@ class ConsolidateCanonicalEntities(Command):
 class AddStakeholder(Command):
     stakeholder_name: str
     stakeholder_type: str
+    stakeholder_description: str
 
 
 @dataclass
@@ -56,6 +57,7 @@ class UpdateStakeholder(Command):
     id: int
     stakeholder_name: str
     stakeholder_type: str
+    stakeholder_description: str
 
 
 @dataclass
