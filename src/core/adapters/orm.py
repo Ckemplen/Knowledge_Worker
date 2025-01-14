@@ -11,12 +11,22 @@ from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 import datetime
 import core.config
 
+
+class BaseORM(Base):
+    __abstract__ = True
+    
+    created_at = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    last_modified_at = Column(DateTime, onupdate=datetime.datetime.now(datetime.timezone.utc))
+    created_by = Column(String)
+    last_modified_by = Column(String)
+    version = Column(Integer, nullable=False, default=1)
+
 metadata = MetaData()
 
 Base = declarative_base()
 
 
-class DocumentORM(Base):
+class DocumentORM(BaseORM):
     __tablename__ = "Documents"
     id = Column(Integer, primary_key=True, autoincrement=True)
     filepath = Column(String, nullable=False)

@@ -5,11 +5,25 @@ from . import events
 from dataclasses import dataclass
 
 
+class BaseDomainModel(BaseModel):
+    created_at: datetime
+    last_modified_at: datetime
+    created_by: str
+    last_modified_by: str
+    version: int = 1
+
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
+
+
 class DomainDataclass:
     pass
 
 
-class Document(BaseModel):
+class Document(BaseDomainModel):
     id: int
     filepath: str
     filename: str
