@@ -20,7 +20,7 @@ router = APIRouter(
 )
 
 
-@router.post("/stakeholders", response_class=HTMLResponse)
+@router.post("/", response_class=HTMLResponse)
 async def add_stakeholder(
     request: Request, bus: messagebus.MessageBus = Depends(get_bus)
 ):
@@ -84,6 +84,7 @@ async def update_stakeholder(
         status_code=200,  # Updated successfully
     )
 
+
 @router.delete("/{stakeholder_id}", response_class=HTMLResponse)
 async def delete_stakeholder(
     request: Request, stakeholder_id: int, bus: messagebus.MessageBus = Depends(get_bus)
@@ -97,6 +98,9 @@ async def delete_stakeholder(
         # Return error message that will be shown to user
         return templates.TemplateResponse(
             "components/error_message.html",
-            {"request": request, "error_message": f"Failed to delete stakeholder: {str(e)}"},
-            status_code=500
+            {
+                "request": request,
+                "error_message": f"Failed to delete stakeholder: {str(e)}",
+            },
+            status_code=500,
         )
