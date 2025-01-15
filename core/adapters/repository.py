@@ -64,6 +64,7 @@ class AbstractRepository(abc.ABC):
         self, updated_obj: PYDANTIC_OBJECT, fields: List[str]
     ) -> PYDANTIC_OBJECT:
         original_object: PYDANTIC_OBJECT = self._get(reference=updated_obj.id)
+        updated_obj.version = original_object.version + 1
         return_obj: PYDANTIC_OBJECT = self._update(updated_obj, fields)
         self.seen.add(
             return_obj
@@ -296,6 +297,10 @@ class SqlAlchemyEntitiesRepository(AbstractRepository):
             if entity_obj is not None
             else None
         )
+
+    def get_entity_by_name(self, name):
+        entity_obj = self.session.query(orm.EntityORM).filter_by(entity_name=name).one()
+        return model.Entity.model_validate(entity_obj)
 
     def get_raw_entities(self, reference) -> Union[List[orm.RawEntityORM], None]:
         entity_obj = self.session.query(orm.EntityORM).filter_by(id=reference).first()

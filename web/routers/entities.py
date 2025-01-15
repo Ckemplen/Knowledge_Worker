@@ -62,3 +62,16 @@ async def update_entity(
         {"request": request, "entity": new_entity},
         status_code=200,  # Updated successfully
     )
+
+
+@router.post("/", response_class=HTMLResponse)
+async def add_entity(request: Request, bus: messagebus.MessageBus = Depends(get_bus)):
+    form_data = await request.form()
+    cmd = commands.AddEntity(**form_data)
+    bus.handle(message=cmd)
+    new_entity = views.get_entity_by_name(uow=bus.uow, name=cmd.entity_name)
+    return templates.TemplateResponse(
+        "components/entity_row.html",
+        {"request": request, "entity": new_entity},
+        status_code=201,  # Created successfully
+    )

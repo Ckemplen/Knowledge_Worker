@@ -70,6 +70,12 @@ def get_stakeholder_by_name(uow: unit_of_work.SqlAlchemyUnitOfWork, name: str):
     return result
 
 
+def get_entity_by_name(uow: unit_of_work.SqlAlchemyUnitOfWork, name: str):
+    with uow:
+        result = uow.entities.get_entity_by_name(name=name)
+    return result
+
+
 def get_stakeholder_by_id(uow: unit_of_work.SqlAlchemyUnitOfWork, id: int):
     with uow:
         result = uow.stakeholders.get(reference=id)

@@ -245,6 +245,28 @@ def create_new_entity(reviewed_canon_entity, uow):
         )
 
 
+def add_entity(cmd: commands.AddEntity, uow: uow.AbstractUnitOfWork):
+    print("Using add_entity handler.")
+    with uow:
+        try:
+            uow.entities.add(
+                dict(
+                    entity_name=cmd.entity_name,
+                    entity_description=cmd.entity_description,
+                    created_at=cmd.created_at,
+                    created_by=cmd.created_by,
+                    last_modified_at=cmd.last_modified_at,
+                    last_modified_by=cmd.last_modified_by,
+                )
+            )
+        except Exception as e:
+            print("Error occurred adding entity.")
+            print(e)
+            uow.rollback()
+        finally:
+            uow.commit()
+
+
 def update_existing_entity(
     existing_canon_entity: Entity, reviewed_canon_entity: CanonicalEntityResponse, uow
 ):
@@ -336,7 +358,14 @@ def update_stakeholder(cmd: commands.UpdateStakeholder, uow: uow.AbstractUnitOfW
             updated_stakeholder = Stakeholder(**asdict(cmd))
             uow.stakeholders.update(
                 updated_obj=updated_stakeholder,
-                fields=["stakeholder_name", "stakeholder_type"],
+                fields=[
+                    "stakeholder_name",
+                    "stakeholder_type",
+                    "version",
+                    "stakeholder_description",
+                    "last_modified_by",
+                    "last_modified_at",
+                ],
             )
         except Exception as e:
             print("Error occured updating stakeholder.")
@@ -457,6 +486,7 @@ EVENT_HANDLERS = {
 COMMAND_HANDLERS = {
     commands.AddStakeholder: ("add_stakeholder", add_stakeholder),
     commands.UpdateStakeholder: ("update_stakeholder", update_stakeholder),
+    commands.AddEntity: ("add_entity", add_entity),
     commands.UpdateEntity: ("update_entity", update_entity),
     commands.UpdateDocumentSummary: (
         "update_document_summary",
