@@ -309,7 +309,7 @@ def link_raw_entities(entity_id, raw_entity_ids, uow):
                 linked_entity.raw_entity_id for linked_entity in linked_raw_entities
             ]:
                 new_raw_entity = EntityRawEntity(
-                    entity_id=entity_id, raw_entity_id=reviewed_id
+                    entity_id=entity_id, raw_entity_id=reviewed_id, link_description="",
                 )
                 uow.entities.add_raw_entity(new_raw_entity)
     except Exception as e:
@@ -324,7 +324,7 @@ def link_document_entities(entity_id, uow):
         for linked_raw_entity in linked_raw_entities:
             doc_id = linked_raw_entity.raw_entity.document_id
             new_document_entity_link = DocumentEntity(
-                document_id=doc_id, entity_id=entity_id
+                document_id=doc_id, entity_id=entity_id, link_description=""
             )
             uow.entities.add_document_entity(new_document_entity_link)
     except Exception as e:

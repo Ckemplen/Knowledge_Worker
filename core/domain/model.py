@@ -20,7 +20,11 @@ class BaseDomainModel(BaseModel):
 
 
 class DomainDataclass:
-    pass
+    created_at: datetime
+    last_modified_at: datetime
+    created_by: str
+    last_modified_by: str
+    version: int = 1
 
 
 class Document(BaseDomainModel):
@@ -85,7 +89,7 @@ class Document(BaseDomainModel):
         }
 
 
-class Comment(BaseModel):
+class Comment(BaseDomainModel):
     id: int
     document_id: int
     author: str
@@ -170,6 +174,7 @@ class Stakeholder(BaseDomainModel):
 class DocumentTopic(DomainDataclass):
     document_id: int
     topic_id: int
+    link_description: str
 
     def __hash__(self):
         return hash((self.topic_id, self.document_id))
@@ -179,6 +184,7 @@ class DocumentTopic(DomainDataclass):
 class TopicRawTopic(DomainDataclass):
     topic_id: int
     raw_topic_id: int
+    link_description: str
 
     def __hash__(self):
         return hash((self.topic_id, self.raw_topic_id))
@@ -188,6 +194,7 @@ class TopicRawTopic(DomainDataclass):
 class DocumentEntity(DomainDataclass):
     document_id: int
     entity_id: int
+    link_description: str
 
     def __hash__(self):
         return hash((self.entity_id, self.document_id))
@@ -197,6 +204,7 @@ class DocumentEntity(DomainDataclass):
 class EntityRawEntity(DomainDataclass):
     entity_id: int
     raw_entity_id: int
+    link_description: str
 
     def __hash__(self):
         return hash((self.entity_id, self.raw_entity_id))

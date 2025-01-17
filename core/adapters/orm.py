@@ -107,25 +107,25 @@ class StakeholderORM(BaseAudit):
     stakeholder_description = Column(String)
 
 
-class DocumentTopicORM(BaseWithToDict):
+class DocumentTopicORM(BaseAudit):
     __tablename__ = "DocumentTopics"
     document_id = Column(Integer, ForeignKey("Documents.id"), primary_key=True)
     topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
+    link_description = Column(String)
     document = relationship("DocumentORM", back_populates="document_topics")
     topic = relationship("TopicORM", back_populates="document_topics")
 
 
-class TopicRawTopicORM(BaseWithToDict):
+class TopicRawTopicORM(BaseAudit):
     __tablename__ = "TopicsRawTopics"
     topic_id = Column(Integer, ForeignKey("Topics.id"), primary_key=True)
     raw_topic_id = Column(Integer, ForeignKey("RawTopics.id"), primary_key=True)
+    link_description = Column(String)
     topic = relationship("TopicORM", back_populates="raw_topics")
     raw_topic = relationship("RawTopicORM", back_populates="topics")
 
 
-class CommentORM(
-    BaseWithToDict
-):  # Not inheriting BaseORM because audit fields not needed
+class CommentORM(BaseAudit):
     __tablename__ = "Comments"
     id = Column(Integer, primary_key=True, autoincrement=True)
     document_id = Column(Integer, ForeignKey("Documents.id"), nullable=False)
@@ -136,22 +136,20 @@ class CommentORM(
     document = relationship("DocumentORM", back_populates="comments")
 
 
-class DocumentEntityORM(
-    BaseWithToDict
-):  # Not inheriting BaseORM because audit fields not needed
+class DocumentEntityORM(BaseAudit):
     __tablename__ = "DocumentEntities"
     document_id = Column(Integer, ForeignKey("Documents.id"), primary_key=True)
     entity_id = Column(Integer, ForeignKey("Entities.id"), primary_key=True)
+    link_description = Column(String)
     document = relationship("DocumentORM", back_populates="document_entities")
     entity = relationship("EntityORM", back_populates="document_entities")
 
 
-class EntityRawEntityORM(
-    BaseWithToDict
-):  # Not inheriting BaseORM because audit fields not needed
+class EntityRawEntityORM(BaseAudit):
     __tablename__ = "EntitiesRawEntities"
     entity_id = Column(Integer, ForeignKey("Entities.id"), primary_key=True)
     raw_entity_id = Column(Integer, ForeignKey("RawEntities.id"), primary_key=True)
+    link_description = Column(String)
     entity = relationship("EntityORM", back_populates="raw_entities")
     raw_entity = relationship("RawEntityORM", back_populates="entities")
 
